@@ -1,14 +1,15 @@
 using Microsoft.AspNetCore.Identity;
+using VioVid.Core.Entities;
 
 namespace VioVid.Core.Identity
 {
     public class ApplicationUser : IdentityUser<Guid>
     {
-        public string NickName { get; set; } = string.Empty;
-        public string Avatar {  get; set; } = string.Empty;
-        public int TokenVersion { get; set; }   // Default equal to 0
+        public int TokenVersion { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpirationDateTime { get; set; }
+
+        public UserProfile UserProfile { get; set; } = null!;
     }
 }
 

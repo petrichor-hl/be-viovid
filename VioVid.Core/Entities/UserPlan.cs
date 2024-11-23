@@ -1,0 +1,16 @@
+using VioVid.Core.Identity;
+
+namespace VioVid.Core.Entities;
+
+public class UserPlan
+{
+    public Guid Id { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    
+    public Guid ApplicationUserId { get; set; }
+    public Guid PlanId { get; set; }
+
+    public ApplicationUser ApplicationUser { get; set; } = null!;
+    public Plan Plan { get; set; } = null!;
+}
