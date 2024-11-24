@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Application\Application.csproj" />
       <ProjectReference Include="..\VioVid.Core\VioVid.Core.csproj" />
       <ProjectReference Include="..\VioVid.Infrastructure\VioVid.Infrastructure.csproj" />
     </ItemGroup>

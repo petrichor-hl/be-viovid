@@ -11,6 +11,7 @@ using VioVid.Core.Identity;
 using VioVid.Core.ServiceContracts;
 using VioVid.Core.Services;
 using VioVid.Infrastructure.DatabaseContext;
+using VioVid.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -136,5 +137,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.Run();
