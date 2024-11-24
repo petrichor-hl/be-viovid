@@ -11,6 +11,7 @@ using VioVid.Core.Identity;
 using VioVid.Core.ServiceContracts;
 using VioVid.Core.Services;
 using VioVid.Infrastructure.DatabaseContext;
+using VioVid.WebAPI.Filters;
 using VioVid.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +21,11 @@ builder.Services.AddControllers(options =>
     //Authorization policy
     var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
     options.Filters.Add(new AuthorizeFilter(policy));
+    // Model Validation
+    options.Filters.Add<ModelValidation>();
 });
+
+
 
 // Add services to the container.
 builder.Services.AddTransient<IJwtService, JwtService>()
