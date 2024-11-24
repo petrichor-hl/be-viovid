@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Web;
 using Application.DTOs.Account;
 using Application.Exceptions;
@@ -114,5 +115,55 @@ public class AccountService : IAccountService
         Console.WriteLine("verifyEmailToken = " + confirmEmailRequest.VerifyEmailToken);
         var result = await _userManager.ConfirmEmailAsync(user, confirmEmailRequest.VerifyEmailToken);
         return result.Succeeded;
+    }
+
+    public async Task<RefreshTokenDto> RefreshToken(RefreshTokenDto refreshTokenDto)
+    {
+        ClaimsPrincipal? principal;
+        try
+        {
+            principal = _jwtService.GetPrincipalFromJwtToken(refreshTokenDto.AccessToken);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidModelException(ex.Message);
+        }
+
+        string email = principal.FindFirstValue(ClaimTypes.Email);
+        ApplicationUser? user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null || user.RefreshToken != refreshTokenDto.RefreshToken || user.RefreshTokenExpirationDateTime <= DateTime.UtcNow)
+        {
+            throw new InvalidModelException("RefreshToken không hợp lệ hoặc đã quá hạn.");
+        }
+
+        string accessToken = _jwtService.GenerateAccessToken(user);
+        (string refreshToken, DateTime expirationDateTime) = _jwtService.GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpirationDateTime = expirationDateTime;
+        await _userManager.UpdateAsync(user);
+
+        return new RefreshTokenDto
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+        };
+    }
+
+    public async Task<bool> Logout(ClaimsPrincipal userPrincipal)
+    {
+        string email = userPrincipal.FindFirstValue(ClaimTypes.Email);
+
+        ApplicationUser user = await _userManager.FindByEmailAsync(email);
+        user.RefreshToken = null;
+        user.RefreshTokenExpirationDateTime = null;
+        user.TokenVersion++;
+        await _userManager.UpdateAsync(user);
+        
+        // Chưa rõ tác dụng của:
+        await _signInManager.SignOutAsync();
+
+        return true;
     }
 }

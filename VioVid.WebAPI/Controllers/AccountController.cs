@@ -41,6 +41,18 @@ public class AccountController : ControllerBase
     {
         return Ok(ApiResult<bool>.Success(await _accountService.ConfirmEmail(confirmEmailRequest)));
     }
+    
+    [AllowAnonymous]
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> GenerateNewAccessToken(RefreshTokenDto refreshTokenDto)
+    {
+        return Ok(ApiResult<RefreshTokenDto>.Success(await _accountService.RefreshToken(refreshTokenDto)));
+    }
 
+    [HttpGet("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        return Ok(ApiResult<bool>.Success(await _accountService.Logout(User)));
+    }
 }
 
