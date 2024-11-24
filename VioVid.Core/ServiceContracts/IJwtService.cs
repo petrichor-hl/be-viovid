@@ -5,13 +5,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using VioVid.Core.Identity;
-using VioVid.Core.Models;
 
-namespace VioVid.Core.ServiceContracts
+namespace VioVid.Core.ServiceContracts;
+
+public interface IJwtService
 {
-    public interface IJwtService
-    {
-        JwtToken CreateJwtToken(ApplicationUser user);
-        ClaimsPrincipal? GetPrincipalFromJwtToken(string token);
-    }
+    string GenerateAccessToken(ApplicationUser user);
+    (string refreshToken, DateTime expirationDateTime) GenerateRefreshToken();
+    ClaimsPrincipal? GetPrincipalFromJwtToken(string token);
 }

@@ -23,9 +23,24 @@ public class AccountController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterDto registerDto)
+    public async Task<IActionResult> Register(RegisterRequest registerRequest)
     {
-        return Ok(ApiResult<Guid>.Success(await _accountService.Register(registerDto)));
+        return Ok(ApiResult<Guid>.Success(await _accountService.Register(registerRequest)));
     }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public  async Task<IActionResult> Login(LoginRequest loginRequest)
+    {
+        return Ok(ApiResult<LoginResponse>.Success(await _accountService.Login(loginRequest)));
+    }
+
+    [AllowAnonymous]
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(ConfirmEmailRequest confirmEmailRequest)
+    {
+        return Ok(ApiResult<bool>.Success(await _accountService.ConfirmEmail(confirmEmailRequest)));
+    }
+
 }
 

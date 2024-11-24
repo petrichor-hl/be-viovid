@@ -36,27 +36,27 @@ public class AccountService : IAccountService
         _configuration = configuration;
     }
     
-    public async Task<Guid> Register(RegisterDto registerDto)
+    public async Task<Guid> Register(RegisterRequest registerRequest)
     {
         // Email is registered
-        if (_userManager.Users.Any(u => u.Email == registerDto.Email))
+        if (_userManager.Users.Any(u => u.Email == registerRequest.Email))
         {
             throw new InvalidModelException("Email đã tồn tại");
         }
         
         ApplicationUser user = new()
         {
-            Email = registerDto.Email,
-            UserName = registerDto.Email,   // UserName is used to log in
+            Email = registerRequest.Email,
+            UserName = registerRequest.Email,   // UserName is used to log in
             UserProfile = new UserProfile()
             {
                 Id = Guid.NewGuid(),
-                Name = registerDto.Name,
+                Name = registerRequest.Name,
                 Avatar = "https://kpaxjjmelbqpllxenpxz.supabase.co/storage/v1/object/public/avatar/default_avt.png",
             }
         };
         
-        var result = await _userManager.CreateAsync(user, registerDto.Password);
+        var result = await _userManager.CreateAsync(user, registerRequest.Password);
         
         if (result.Succeeded)
         {
@@ -64,7 +64,7 @@ public class AccountService : IAccountService
             var verifyEmailTokenEncoded = HttpUtility.UrlEncode(verifyEmailToken);
             Console.WriteLine("verifyEmailToken = " + verifyEmailToken);
 
-            var confirmLink = $"{_configuration["VioVidDomain"]}/#/confirm-email?email={registerDto.Email}&verifyEmailToken={verifyEmailTokenEncoded}";
+            var confirmLink = $"{_configuration["VioVidDomain"]}/#/confirm-email?email={registerRequest.Email}&verifyEmailToken={verifyEmailTokenEncoded}";
             // await _emailSender.SendMailAsync(registerDTO.Email, "[VioVid] Please confirm your email address", EmailTemplate.ConfirmEmail(registerDTO.Name, redirectTo: confirmLink));
             
             return user.Id;
@@ -74,5 +74,45 @@ public class AccountService : IAccountService
             var errorMessage = string.Join(" | ", result.Errors.Select(e => e.Description)); // error1 | error2
             throw new InvalidModelException(errorMessage);
         }
+    }
+
+    public async Task<LoginResponse> Login(LoginRequest loginRequest)
+    {
+        SignInResult result = await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, isPersistent: false, lockoutOnFailure: false);
+        ApplicationUser user = await _userManager.FindByEmailAsync(loginRequest.Email);
+            
+        if (result.Succeeded)
+        {
+            string accessToken = _jwtService.GenerateAccessToken(user);
+            (string refreshToken, DateTime expirationDateTime) = _jwtService.GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            
+            user.RefreshTokenExpirationDateTime = expirationDateTime;
+            await _userManager.UpdateAsync(user);
+
+            return new LoginResponse
+            {
+                Email = user.Email,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+        }
+        else
+        {
+            if (result.IsNotAllowed)
+            {
+                throw new InvalidModelException("Đăng nhập thất bại. Email chưa được xác thực.");
+            }
+            throw new InvalidModelException("Đăng nhập thất bại. Vui lòng kiểm tra lại Email và Mật Khẩu.");
+        }
+    }
+
+    public async Task<bool> ConfirmEmail(ConfirmEmailRequest confirmEmailRequest)
+    {
+        ApplicationUser user = await _userManager.FindByEmailAsync(confirmEmailRequest.Email);
+
+        Console.WriteLine("verifyEmailToken = " + confirmEmailRequest.VerifyEmailToken);
+        var result = await _userManager.ConfirmEmailAsync(user, confirmEmailRequest.VerifyEmailToken);
+        return result.Succeeded;
     }
 }

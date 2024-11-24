@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Account;
 
-public class RegisterDto
+public class RegisterRequest
 {
     [Required, EmailAddress]
     public string Email { get; set; } = string.Empty;
