@@ -485,7 +485,7 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("NickName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 

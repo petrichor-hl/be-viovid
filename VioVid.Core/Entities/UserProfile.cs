@@ -5,7 +5,7 @@ namespace VioVid.Core.Entities;
 public class UserProfile
 {
     public Guid Id { get; set; }
-    public string NickName { get; set; } = null!;
+    public string Name { get; set; } = null!;
     public string Avatar {  get; set; } = null!;
     
     public Guid ApplicationUserId { get; set; }

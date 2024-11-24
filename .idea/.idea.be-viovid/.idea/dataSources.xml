@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="viovid@localhost" uuid="8962911d-5763-4429-a76d-4a1d7b3b20ad">
+    <data-source source="LOCAL" name="viovid@localhost" uuid="4d69bd4e-cf12-4097-8d9d-519793266c26">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <configured-by-url>true</configured-by-url>

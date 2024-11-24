@@ -238,7 +238,7 @@ namespace VioVid.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    NickName = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
                     Avatar = table.Column<string>(type: "text", nullable: false),
                     ApplicationUserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },

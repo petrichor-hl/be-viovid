@@ -12,7 +12,7 @@ using VioVid.Infrastructure.DatabaseContext;
 namespace VioVid.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241123180243_Initial")]
+    [Migration("20241124182755_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -487,7 +487,7 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("NickName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 

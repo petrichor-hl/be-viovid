@@ -13,6 +13,8 @@ using VioVid.Core.Services;
 using VioVid.Infrastructure.DatabaseContext;
 using VioVid.WebAPI.Filters;
 using VioVid.WebAPI.Middlewares;
+using VioVid.WebAPI.ServiceContracts;
+using VioVid.WebAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +31,8 @@ builder.Services.AddControllers(options =>
 
 // Add services to the container.
 builder.Services.AddTransient<IJwtService, JwtService>()
-    .AddTransient<IEmailSender, EmailSender>();
+    .AddTransient<IEmailSender, EmailSender>()
+    .AddScoped<IAccountService, AccountService>();
     
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
