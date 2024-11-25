@@ -27,12 +27,11 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ModelValidation>();
 });
 
-
-
 // Add services to the container.
 builder.Services.AddTransient<IJwtService, JwtService>()
     .AddTransient<IEmailSender, EmailSender>()
-    .AddScoped<IAccountService, AccountService>();
+    .AddScoped<IAccountService, AccountService>()
+    .AddScoped<IGenreService, GenreService>();
     
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
