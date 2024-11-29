@@ -12,7 +12,7 @@ using VioVid.Infrastructure.DatabaseContext;
 namespace VioVid.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241124182755_Initial")]
+    [Migration("20241129071733_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -460,16 +460,11 @@ namespace VioVid.Infrastructure.Migrations
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("UserProfileId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("PlanId");
-
-                    b.HasIndex("UserProfileId");
 
                     b.ToTable("UserPlans");
                 });
@@ -771,7 +766,7 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.UserPlan", b =>
                 {
                     b.HasOne("VioVid.Core.Identity.ApplicationUser", "ApplicationUser")
-                        .WithMany()
+                        .WithMany("UserPlans")
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -781,10 +776,6 @@ namespace VioVid.Infrastructure.Migrations
                         .HasForeignKey("PlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("VioVid.Core.Entities.UserProfile", null)
-                        .WithMany("UserPlans")
-                        .HasForeignKey("UserProfileId");
 
                     b.Navigation("ApplicationUser");
 
@@ -834,13 +825,10 @@ namespace VioVid.Infrastructure.Migrations
                     b.Navigation("TopicFilms");
                 });
 
-            modelBuilder.Entity("VioVid.Core.Entities.UserProfile", b =>
-                {
-                    b.Navigation("UserPlans");
-                });
-
             modelBuilder.Entity("VioVid.Core.Identity.ApplicationUser", b =>
                 {
+                    b.Navigation("UserPlans");
+
                     b.Navigation("UserProfile")
                         .IsRequired();
                 });

@@ -10,6 +10,4 @@ public class UserProfile
     
     public Guid ApplicationUserId { get; set; }
     public ApplicationUser ApplicationUser { get; set; } = null!;
-
-    public ICollection<UserPlan> UserPlans { get; set; } = null!;
 }

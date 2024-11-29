@@ -379,6 +379,33 @@ namespace VioVid.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserPlans",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ApplicationUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PlanId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPlans", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserPlans_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserPlans_Plans_PlanId",
+                        column: x => x.PlanId,
+                        principalTable: "Plans",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TopicFilms",
                 columns: table => new
                 {
@@ -402,39 +429,6 @@ namespace VioVid.Infrastructure.Migrations
                         principalTable: "Topics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserPlans",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ApplicationUserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PlanId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserProfileId = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserPlans", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserPlans_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserPlans_Plans_PlanId",
-                        column: x => x.PlanId,
-                        principalTable: "Plans",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserPlans_UserProfiles_UserProfileId",
-                        column: x => x.UserProfileId,
-                        principalTable: "UserProfiles",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -570,11 +564,6 @@ namespace VioVid.Infrastructure.Migrations
                 column: "PlanId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserPlans_UserProfileId",
-                table: "UserPlans",
-                column: "UserProfileId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserProfiles_ApplicationUserId",
                 table: "UserProfiles",
                 column: "ApplicationUserId",
@@ -620,6 +609,9 @@ namespace VioVid.Infrastructure.Migrations
                 name: "UserPlans");
 
             migrationBuilder.DropTable(
+                name: "UserProfiles");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
@@ -638,13 +630,10 @@ namespace VioVid.Infrastructure.Migrations
                 name: "Plans");
 
             migrationBuilder.DropTable(
-                name: "UserProfiles");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Films");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
         }
     }
 }
