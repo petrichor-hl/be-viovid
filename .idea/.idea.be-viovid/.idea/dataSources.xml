@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="viovid@localhost" uuid="4d69bd4e-cf12-4097-8d9d-519793266c26">
+    <data-source source="LOCAL" name="viovid@aws-0-us-east-1.pooler.supabase.com" uuid="be53cf77-23c7-44bb-8b11-d6f63441a4fe">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <configured-by-url>true</configured-by-url>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/viovid</jdbc-url>
+      <jdbc-url>jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:6543/viovid?password=uxrW*_D4X_J58sB&amp;user=postgres.htganmgiwwqyswitxwtl</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

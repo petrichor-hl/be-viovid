@@ -12,7 +12,7 @@ using VioVid.Infrastructure.DatabaseContext;
 namespace VioVid.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241129071733_Initial")]
+    [Migration("20241129105054_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
