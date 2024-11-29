@@ -31,7 +31,8 @@ builder.Services.AddControllers(options =>
 builder.Services.AddTransient<IJwtService, JwtService>()
     .AddTransient<IEmailSender, EmailSender>()
     .AddScoped<IAccountService, AccountService>()
-    .AddScoped<IGenreService, GenreService>();
+    .AddScoped<IGenreService, GenreService>()
+    .AddScoped<IPlanService, PlanService>();
     
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

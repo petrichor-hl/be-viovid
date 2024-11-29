@@ -26,7 +26,7 @@ public class GenreService : IGenreService
         var genre = await _dbContext.Genres.FindAsync(id);
         if (genre == null)
         {
-            throw new NotFoundException($"Không tìm thấy Thể loại có id {id}");
+            throw new NotFoundException($"Không tìm thấy Genre có id {id}");
         }
         return genre;
     }
