@@ -6,7 +6,7 @@ namespace Application.DTOs.Person;
 public class CreatePersonRequest
 {
     [Required]
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = string.Empty;
     
     [Required]
     public Gender Gender { get; set; }
@@ -15,7 +15,7 @@ public class CreatePersonRequest
     public double Popularity { get; set; }
     
     [Required]
-    public string? ProfilePath { get; set; } = null!;
+    public string? ProfilePath { get; set; } = string.Empty;
     
     [Required]
     public string? Biography { get; set; }

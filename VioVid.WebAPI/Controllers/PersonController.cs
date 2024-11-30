@@ -19,7 +19,7 @@ public class PersonController : Controller
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync(GetPagingPersonRequest getPagingPersonRequest)
+    public async Task<IActionResult> GetAllAsync([FromQuery] GetPagingPersonRequest getPagingPersonRequest)
     {
         return Ok(ApiResult<PaginationResponse<Person>>.Success(await _personService.GetAllAsync(getPagingPersonRequest)));
     }

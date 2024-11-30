@@ -42,8 +42,8 @@ public class PersonService : IPersonService
         
         return new PaginationResponse<Person>
         {
-            Items = persons,
             TotalCount = totalRecords,
+            Items = persons,
             PageIndex = pageIndex,
             PageSize = pageSize
         };
