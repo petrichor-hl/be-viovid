@@ -6,4 +6,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="DTOs\Film\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\VioVid.Core\VioVid.Core.csproj" />
+    </ItemGroup>
+
 </Project>

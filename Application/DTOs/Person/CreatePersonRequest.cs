@@ -1,18 +1,28 @@
+using System.ComponentModel.DataAnnotations;
 using VioVid.Core.Enum;
 
-namespace VioVid.Core.Entities;
+namespace Application.DTOs.Person;
 
-public class Person
+public class CreatePersonRequest
 {
-    public Guid Id { get; set; }
+    [Required]
     public string Name { get; set; } = null!;
-    public Gender Gender { get; set; }
-    public double Popularity { get; set; }
-    public string? ProfilePath { get; set; } = null!;
-    public string? Biography { get; set; }
-    public string? KnownForDepartment { get; set; }
-    public DateOnly? Dob { get; set; }
     
-    public ICollection<Cast> Casts { get; set; } = null!;
-    public ICollection<Crew> Crews { get; set; } = null!;
+    [Required]
+    public Gender Gender { get; set; }
+    
+    [Required]
+    public double Popularity { get; set; }
+    
+    [Required]
+    public string? ProfilePath { get; set; } = null!;
+    
+    [Required]
+    public string? Biography { get; set; }
+    
+    [Required]
+    public string? KnownForDepartment { get; set; }
+    
+    [Required]
+    public DateOnly? Dob { get; set; }
 }

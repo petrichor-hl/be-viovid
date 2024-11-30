@@ -60,6 +60,7 @@ public class PlanService : IPlanService
         {
             throw new NotFoundException($"Không tìm thấy Plan có id {id}");
         }
+        
         plan.Name = updateGenreRequest.Name;
         plan.Price = updateGenreRequest.Price;
         plan.Duration = updateGenreRequest.Duration;

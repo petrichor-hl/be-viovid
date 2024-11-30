@@ -11,6 +11,7 @@ using VioVid.Core.Identity;
 using VioVid.Core.ServiceContracts;
 using VioVid.Core.Services;
 using VioVid.Infrastructure.DatabaseContext;
+using VioVid.WebAPI.CustomJsonConverter;
 using VioVid.WebAPI.Filters;
 using VioVid.WebAPI.Middlewares;
 using VioVid.WebAPI.ServiceContracts;
@@ -25,6 +26,10 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
     // Model Validation
     options.Filters.Add<ModelValidation>();
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
 });
 
 // Add services to the container.
@@ -32,7 +37,8 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddTransient<IEmailSender, EmailSender>()
     .AddScoped<IAccountService, AccountService>()
     .AddScoped<IGenreService, GenreService>()
-    .AddScoped<IPlanService, PlanService>();
+    .AddScoped<IPlanService, PlanService>()
+    .AddScoped<IPersonService, PersonService>();
     
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
