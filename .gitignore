@@ -456,12 +456,9 @@ $RECYCLE.BIN/
 
 
 # Ignore appsettings files
-appsettings.json
-appsettings.*.json
+VioVid.WebAPI/appsettings.json
 
 # Ignore launch settings
-launchSettings.json
-
 # Ignore project files
 *.csproj
 *.vbproj
