@@ -54,7 +54,7 @@ public class PersonService : IPersonService
         var person = await _dbContext.Persons.FindAsync(id);
         if (person == null)
         {
-            throw new NotFoundException($"Không tìm thấy Genre có id {id}");
+            throw new NotFoundException($"Không tìm thấy Person có id {id}");
         }
         return person;
     }
@@ -82,7 +82,7 @@ public class PersonService : IPersonService
         var person = await _dbContext.Persons.FindAsync(id);
         if (person == null)
         {
-            throw new NotFoundException($"Không tìm thấy Genre có id {id}");
+            throw new NotFoundException($"Không tìm thấy Person có id {id}");
         }
         
         person.Name = updatePersonRequest.Name;
@@ -102,7 +102,7 @@ public class PersonService : IPersonService
         var person = await _dbContext.Persons.FindAsync(id);
         if (person == null)
         {
-            throw new NotFoundException($"Không tìm thấy Genre có id {id}");
+            throw new NotFoundException($"Không tìm thấy Person có id {id}");
         }
         
         _dbContext.Persons.Remove(person);

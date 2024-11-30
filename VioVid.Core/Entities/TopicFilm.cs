@@ -3,7 +3,6 @@ namespace VioVid.Core.Entities;
 public class TopicFilm
 {
     public Guid Id { get; set; }
-    public int Order { get; set; }
     
     public Guid TopicId { get; set; }
     public Guid FilmId { get; set; }

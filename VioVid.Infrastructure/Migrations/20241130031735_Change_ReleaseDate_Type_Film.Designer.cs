@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VioVid.Infrastructure.DatabaseContext;
@@ -11,9 +12,10 @@ using VioVid.Infrastructure.DatabaseContext;
 namespace VioVid.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241130031735_Change_ReleaseDate_Type_Film")]
+    partial class Change_ReleaseDate_Type_Film
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -424,6 +426,9 @@ namespace VioVid.Infrastructure.Migrations
                     b.Property<Guid>("FilmId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("TopicId")
                         .HasColumnType("uuid");
 
@@ -643,7 +648,7 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.Cast", b =>
                 {
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
-                        .WithMany("Casts")
+                        .WithMany()
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -662,7 +667,7 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.Crew", b =>
                 {
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
-                        .WithMany("Crews")
+                        .WithMany()
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -692,7 +697,7 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.GenreFilm", b =>
                 {
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
-                        .WithMany("GenreFilms")
+                        .WithMany()
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -717,7 +722,7 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -730,7 +735,7 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.Season", b =>
                 {
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
-                        .WithMany("Seasons")
+                        .WithMany()
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -741,7 +746,7 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.TopicFilm", b =>
                 {
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
-                        .WithMany("TopicFilms")
+                        .WithMany()
                         .HasForeignKey("FilmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -785,21 +790,6 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
-                });
-
-            modelBuilder.Entity("VioVid.Core.Entities.Film", b =>
-                {
-                    b.Navigation("Casts");
-
-                    b.Navigation("Crews");
-
-                    b.Navigation("GenreFilms");
-
-                    b.Navigation("Reviews");
-
-                    b.Navigation("Seasons");
-
-                    b.Navigation("TopicFilms");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Genre", b =>

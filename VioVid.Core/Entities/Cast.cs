@@ -6,8 +6,8 @@ public class Cast
     public string Character { get; set; } = null!;
     
     public Guid FilmId { get; set; }
-    public Guid PersonId { get; set; }
-
     public Film Film { get; set; } = null!;
+
+    public Guid PersonId { get; set; }
     public Person Person { get; set; } = null!;
 }

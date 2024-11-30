@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="DTOs\Film\" />
+      <ProjectReference Include="..\VioVid.Core\VioVid.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\VioVid.Core\VioVid.Core.csproj" />
+      <Folder Include="DTOs\Episode\" />
     </ItemGroup>
 
 </Project>

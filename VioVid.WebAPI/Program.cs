@@ -41,7 +41,8 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddScoped<IGenreService, GenreService>()
     .AddScoped<IPlanService, PlanService>()
     .AddScoped<IPersonService, PersonService>()
-    .AddScoped<ITopicService, TopicService>();
+    .AddScoped<ITopicService, TopicService>()
+    .AddScoped<IFilmService, FilmService>();
     
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
