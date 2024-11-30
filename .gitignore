@@ -453,3 +453,16 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+
+# Ignore appsettings files
+appsettings.json
+appsettings.*.json
+
+# Ignore launch settings
+launchSettings.json
+
+# Ignore project files
+*.csproj
+*.vbproj
+*.fsproj
