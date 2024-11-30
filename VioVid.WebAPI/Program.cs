@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -29,6 +30,7 @@ builder.Services.AddControllers(options =>
 })
 .AddJsonOptions(options =>
 {
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
 });
 
@@ -38,7 +40,8 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddScoped<IAccountService, AccountService>()
     .AddScoped<IGenreService, GenreService>()
     .AddScoped<IPlanService, PlanService>()
-    .AddScoped<IPersonService, PersonService>();
+    .AddScoped<IPersonService, PersonService>()
+    .AddScoped<ITopicService, TopicService>();
     
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
