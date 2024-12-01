@@ -1,5 +1,6 @@
 using Application.DTOs;
-using Application.DTOs.Person;
+using Application.DTOs.Person.Req;
+using Application.DTOs.Person.Res;
 using Microsoft.AspNetCore.Mvc;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
@@ -27,7 +28,7 @@ public class PersonController : Controller
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetPersonById(Guid id)
     {
-        return Ok(ApiResult<Person>.Success(await _personService.GetByIdAsync(id)));
+        return Ok(ApiResult<PersonResponse>.Success(await _personService.GetByIdAsync(id)));
     }
     
     [HttpPost]

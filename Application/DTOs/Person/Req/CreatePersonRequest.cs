@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using VioVid.Core.Enum;
 
-namespace Application.DTOs.Person;
+namespace Application.DTOs.Person.Req;
 
 public class CreatePersonRequest
 {

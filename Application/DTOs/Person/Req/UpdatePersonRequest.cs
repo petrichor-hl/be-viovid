@@ -1,4 +1,4 @@
-namespace Application.DTOs.Person;
+namespace Application.DTOs.Person.Req;
 
 public class UpdatePersonRequest : CreatePersonRequest
 {

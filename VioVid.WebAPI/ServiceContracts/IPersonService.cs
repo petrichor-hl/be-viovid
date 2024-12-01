@@ -1,4 +1,5 @@
-using Application.DTOs.Person;
+using Application.DTOs.Person.Req;
+using Application.DTOs.Person.Res;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
 
@@ -8,7 +9,7 @@ public interface IPersonService
 {
     Task<PaginationResponse<Person>> GetAllAsync(GetPagingPersonRequest getPagingPersonRequest);
     
-    Task<Person> GetByIdAsync(Guid id);
+    Task<PersonResponse> GetByIdAsync(Guid id);
     
     Task<Person> CreatePersonAsync(CreatePersonRequest createPersonRequest);
 

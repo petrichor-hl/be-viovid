@@ -1,4 +1,6 @@
-using Application.DTOs.Person;
+using Application.DTOs.Film.Res;
+using Application.DTOs.Person.Req;
+using Application.DTOs.Person.Res;
 using Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Common;
@@ -49,14 +51,40 @@ public class PersonService : IPersonService
         };
     }
 
-    public async Task<Person> GetByIdAsync(Guid id)
+    public async Task<PersonResponse> GetByIdAsync(Guid id)
     {
-        var person = await _dbContext.Persons.FindAsync(id);
+        var person = await _dbContext.Persons
+            .Include(p => p.Casts)
+            .ThenInclude(cast => cast.Film)
+            .Include(p => p.Crews)
+            .ThenInclude(crew => crew.Film)
+            .FirstOrDefaultAsync(p => p.Id == id);
         if (person == null)
         {
             throw new NotFoundException($"Không tìm thấy Person có id {id}");
         }
-        return person;
+        return new PersonResponse
+        {
+            Id = person.Id,
+            Name = person.Name,
+            Gender = person.Gender,
+            Popularity = person.Popularity,
+            ProfilePath = person.ProfilePath,
+            Biography = person.Biography,
+            KnownForDepartment = person.KnownForDepartment,
+            Dob = person.Dob,
+            Films = person.Casts.Select(cast => new SimpleFilmResponse
+            {
+                FilmId = cast.Film.Id,
+                Name = cast.Film.Name,
+                PosterPath = cast.Film.PosterPath,
+            }).Concat(person.Crews.Select(crew => new SimpleFilmResponse
+            {
+                FilmId = crew.Film.Id,
+                Name = crew.Film.Name,
+                PosterPath = crew.Film.PosterPath,
+            })).ToList(),
+        };
     }
 
     public async Task<Person> CreatePersonAsync(CreatePersonRequest createPersonRequest)

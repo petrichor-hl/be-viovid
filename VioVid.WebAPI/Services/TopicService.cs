@@ -32,7 +32,7 @@ public class TopicService : ITopicService
             Name = topic.Name,
             Films = topic.TopicFilms.Select(tp => new SimpleFilmResponse
             {
-                Id = tp.FilmId,
+                FilmId = tp.FilmId,
                 Name = tp.Film.Name,
                 PosterPath = tp.Film.PosterPath,
             }).ToList(),

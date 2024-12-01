@@ -47,7 +47,7 @@ public class FilmService : IFilmService
             TotalCount = totalRecords,
             Items = films.Select(f => new SimpleFilmResponse
             {
-                Id = f.Id,
+                FilmId = f.Id,
                 Name = f.Name,
                 PosterPath = f.PosterPath,
             }),
@@ -69,7 +69,7 @@ public class FilmService : IFilmService
         }
         return new FilmResponse
         {
-            Id = film.Id,
+            FilmId = film.Id,
             Name = film.Name,
             Overview = film.Overview,
             PosterPath = film.PosterPath,
