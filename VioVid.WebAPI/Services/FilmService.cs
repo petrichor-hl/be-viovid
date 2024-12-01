@@ -158,17 +158,8 @@ public class FilmService : IFilmService
     public async Task<ReviewResponse> PostReview(Guid filmId, PostReviewRequest postReviewRequest)
     {
         var user = _httpContextAccessor.HttpContext?.User;
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
-        }
-        
-        var userIdClaim = user.FindFirst("user-id");
-        if (userIdClaim == null)
-        {
-            throw new Exception("Không tìm thấy claim 'user-id' trong AccessToken.");
-        }
-        var applicationUserId = Guid.Parse(userIdClaim.Value);
+        var userIdClaim = user!.FindFirst("UserId");
+        var applicationUserId = Guid.Parse(userIdClaim!.Value);
         
         var film = await _dbContext.Films
             .Include(f => f.Reviews)
@@ -177,12 +168,6 @@ public class FilmService : IFilmService
         {
             throw new NotFoundException($"Không tìm thấy Film có id {filmId}");
         }
-        
-        // Kiểm tra xem người dùng đã đánh giá phim này trước đây hay chưa
-        // if (film.Reviews.Any(review => review.ApplicationUserId == applicationUserId))
-        // {
-        //     throw new DuplicateException($"User {applicationUserId} đã đánh giá phim này rồi.");
-        // }
         
         var review = new Review
         {

@@ -60,5 +60,11 @@ public class AccountController : ControllerBase
     {
         return Ok(ApiResult<Guid>.Success(await _accountService.DeleteAccount()));
     }
+    
+    [HttpPost("change-password")]
+    public async Task<IActionResult> AddFilmToMyList(ChangePasswordRequest changePasswordRequest)
+    {
+        return Ok(ApiResult<bool>.Success(await _accountService.ChangePassword(changePasswordRequest)));
+    }
 }
 

@@ -16,4 +16,6 @@ public interface IAccountService
     Task<bool> Logout();
 
     Task<Guid> DeleteAccount();
+    
+    Task<bool> ChangePassword(ChangePasswordRequest changePasswordRequest);
 }

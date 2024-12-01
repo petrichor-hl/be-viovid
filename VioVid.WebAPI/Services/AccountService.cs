@@ -156,17 +156,13 @@ public class AccountService : IAccountService
     public async Task<bool> Logout()
     {
         var userPrincipal = _httpContextAccessor.HttpContext?.User;
-        if (userPrincipal == null)
-        {
-            throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
-        }
-        string email = userPrincipal.FindFirstValue(ClaimTypes.Email);
+        var userId = userPrincipal.FindFirstValue("UserId");
 
-        ApplicationUser user = await _userManager.FindByEmailAsync(email);
-        user.RefreshToken = null;
-        user.RefreshTokenExpirationDateTime = null;
-        user.TokenVersion++;
-        await _userManager.UpdateAsync(user);
+        var  applicationUser = await _userManager.FindByIdAsync(userId);
+        applicationUser.RefreshToken = null;
+        applicationUser.RefreshTokenExpirationDateTime = null;
+        applicationUser.TokenVersion++;
+        await _userManager.UpdateAsync(applicationUser);
         
         // Chưa rõ tác dụng của:
         await _signInManager.SignOutAsync();
@@ -176,21 +172,11 @@ public class AccountService : IAccountService
 
     public async Task<Guid> DeleteAccount()
     {
-        var user = _httpContextAccessor.HttpContext?.User;
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
-        }
-        
-        var userIdClaim = user.FindFirst("user-id");
-        if (userIdClaim == null)
-        {
-            throw new Exception("Không tìm thấy claim 'user-id' trong AccessToken.");
-        }
-        var applicationUserId = Guid.Parse(userIdClaim.Value);
+        var userPrincipal = _httpContextAccessor.HttpContext?.User;
+        var userId = userPrincipal!.FindFirstValue("UserId");
         
         // Tìm người dùng từ cơ sở dữ liệu
-        var applicationUser = await _userManager.FindByIdAsync(applicationUserId.ToString());
+        var applicationUser = await _userManager.FindByIdAsync(userId);
         if (applicationUser == null)
         {
             throw new NotFoundException("Người dùng không tồn tại.");
@@ -205,6 +191,27 @@ public class AccountService : IAccountService
         }
         
         // Trả về ID người dùng đã bị xóa
-        return applicationUserId;
+        return applicationUser.Id;
+    }
+
+    public async Task<bool> ChangePassword(ChangePasswordRequest changePasswordRequest)
+    {
+        var userPrincipal = _httpContextAccessor.HttpContext?.User;
+        var userId = userPrincipal!.FindFirstValue("UserId");
+        
+        var applicationUser = await _userManager.FindByIdAsync(userId);
+        if (applicationUser == null)
+        {
+            throw new NotFoundException("Người dùng không tồn tại.");
+        }
+        
+        var result = await _userManager.ChangePasswordAsync(applicationUser, changePasswordRequest.CurrentPassword, changePasswordRequest.NewPassword);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"Đổi mật khẩu thất bại: {errors}");
+        }
+        
+        return true;
     }
 }
