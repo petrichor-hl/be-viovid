@@ -30,6 +30,7 @@ public class TopicService : ITopicService
         {
             TopicId = topic.Id,
             Name = topic.Name,
+            Order = topic.Order,
             Films = topic.TopicFilms.Select(tp => new SimpleFilmResponse
             {
                 FilmId = tp.FilmId,
