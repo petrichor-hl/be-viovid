@@ -34,6 +34,8 @@ builder.Services.AddControllers(options =>
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
 });
 
+builder.Services.AddHttpContextAccessor();
+
 // Add services to the container.
 builder.Services.AddTransient<IJwtService, JwtService>()
     .AddTransient<IEmailSender, EmailSender>()

@@ -31,12 +31,7 @@ public class FilmController : ControllerBase
     {
         return Ok(ApiResult<FilmResponse>.Success(await _filmService.GetByIdAsync(id)));
     }
-    
-    // [HttpGet("{id:guid}/seasons")]
-    // public async Task<IActionResult> GetSeasons(Guid id)
-    // {
-    //     return Ok(ApiResult<List<Season>>.Success(await _filmService.GetSeasonsAsync(id)));
-    // }
+
     
     [HttpGet("{filmId:guid}/seasons/{seasonId:guid}")]
     public async Task<IActionResult> GetSeasons(Guid filmId, Guid seasonId)
@@ -44,10 +39,16 @@ public class FilmController : ControllerBase
         return Ok(ApiResult<SeasonResponse>.Success(await _filmService.GetSeasonsAsync(filmId, seasonId)));
     }
     
-    [HttpGet("{id:guid}/reviews")]
-    public async Task<IActionResult> GetReviews(Guid id)
+    [HttpGet("{filmId:guid}/reviews")]
+    public async Task<IActionResult> GetReviews(Guid filmId)
     {
-        return Ok(ApiResult<List<Review>>.Success(await _filmService.GetReviewsAsync(id)));
+        return Ok(ApiResult<List<ReviewResponse>>.Success(await _filmService.GetReviewsAsync(filmId)));
+    }
+    
+    [HttpPost("{filmId:guid}/reviews")]
+    public async Task<IActionResult> PostReview(Guid filmId, PostReviewRequest postReviewRequest)
+    {
+        return Ok(ApiResult<ReviewResponse>.Success(await _filmService.PostReview(filmId, postReviewRequest)));
     }
     
     [HttpGet("{id:guid}/casts")]

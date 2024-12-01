@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using Application.DTOs.Film;
 using Application.DTOs.Film.Req;
 using Application.DTOs.Film.Res;
@@ -13,10 +14,12 @@ namespace VioVid.WebAPI.Services;
 public class FilmService : IFilmService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     
-    public FilmService(ApplicationDbContext dbContext)
+    public FilmService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
     {
         _dbContext = dbContext;
+        _httpContextAccessor = httpContextAccessor;
     }
     
     public async Task<PaginationResponse<SimpleFilmResponse>> GetAllAsync(GetPagingFilmRequest getPagingFilmRequest)
@@ -93,18 +96,6 @@ public class FilmService : IFilmService
         };
     }
 
-    // public async Task<List<Season>> GetSeasonsAsync(Guid id)
-    // {
-    //     // Chỉ cần kiểm tra Film(id) có tồn tại hay không thôi
-    //     // Không cần truy xuất Film Object như những func khác
-    //     var filmExists = await _dbContext.Films.AnyAsync(f => f.Id == id);
-    //     if (!filmExists)
-    //     {
-    //         throw new NotFoundException($"Không tìm thấy Film có id {id}");
-    //     }
-    //     return await _dbContext.Seasons.Where(s => s.FilmId == id).ToListAsync();
-    // }
-
     public async Task<SeasonResponse> GetSeasonsAsync(Guid filmId, Guid seasonId)
     {
         var film = await _dbContext.Films.FindAsync(filmId);
@@ -140,14 +131,78 @@ public class FilmService : IFilmService
         };
     }
 
-    public async Task<List<Review>> GetReviewsAsync(Guid id)
+    public async Task<List<ReviewResponse>> GetReviewsAsync(Guid id)
     {
         var filmExists = await _dbContext.Films.AnyAsync(f => f.Id == id);
         if (!filmExists)
         {
             throw new NotFoundException($"Không tìm thấy Film có id {id}");
         }
-        return await _dbContext.Reviews.Where(s => s.FilmId == id).ToListAsync();
+        return await _dbContext.Reviews
+            .Include(review => review.ApplicationUser)
+            .ThenInclude(user => user.UserProfile)
+            .Where(review => review.FilmId == id)
+            .OrderByDescending(review => review.CreateAt)   // Sắp xếp theo bình luận mới nhất trước
+            .Select(review => new ReviewResponse
+            {
+                Id = review.Id,
+                UserName = review.ApplicationUser.UserProfile.Name,
+                UserAvatar = review.ApplicationUser.UserProfile.Avatar,
+                Start = review.Start,
+                Content = review.Content,
+                CreateAt = review.CreateAt,
+            })
+            .ToListAsync();
+    }
+
+    public async Task<ReviewResponse> PostReview(Guid filmId, PostReviewRequest postReviewRequest)
+    {
+        var user = _httpContextAccessor.HttpContext?.User;
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
+        }
+        
+        var userIdClaim = user.FindFirst("user-id");
+        if (userIdClaim == null)
+        {
+            throw new Exception("Không tìm thấy claim 'user-id' trong AccessToken.");
+        }
+        var applicationUserId = Guid.Parse(userIdClaim.Value);
+        
+        var film = await _dbContext.Films
+            .Include(f => f.Reviews)
+            .FirstOrDefaultAsync(f => f.Id == filmId);
+        if (film == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Film có id {filmId}");
+        }
+        
+        // Kiểm tra xem người dùng đã đánh giá phim này trước đây hay chưa
+        // if (film.Reviews.Any(review => review.ApplicationUserId == applicationUserId))
+        // {
+        //     throw new DuplicateException($"User {applicationUserId} đã đánh giá phim này rồi.");
+        // }
+        
+        var review = new Review
+        {
+            Start = postReviewRequest.Start,
+            Content = postReviewRequest.Content,
+            CreateAt = DateTime.UtcNow,
+            FilmId = filmId,
+            ApplicationUserId = applicationUserId
+        };
+        
+        await _dbContext.Reviews.AddAsync(review);
+        await _dbContext.SaveChangesAsync();
+        
+        return new ReviewResponse
+        {
+            Id = review.Id,
+            Start = review.Start,
+            Content = review.Content,
+            CreateAt = review.CreateAt,
+        };
     }
 
     public async Task<List<SimpleCastResponse>> GetCastsAsync(Guid id)

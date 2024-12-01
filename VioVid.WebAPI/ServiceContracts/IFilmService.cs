@@ -11,11 +11,11 @@ public interface IFilmService
     
     Task<FilmResponse> GetByIdAsync(Guid id);
     
-    // Task<List<Season>> GetSeasonsAsync(Guid id);
-    
     Task<SeasonResponse> GetSeasonsAsync(Guid filmId, Guid seasonId);
     
-    Task<List<Review>> GetReviewsAsync(Guid id);
+    Task<List<ReviewResponse>> GetReviewsAsync(Guid id);
+    
+    Task<ReviewResponse> PostReview(Guid filmId, PostReviewRequest postReviewRequest);
     
     Task<List<SimpleCastResponse>> GetCastsAsync(Guid id);
     
