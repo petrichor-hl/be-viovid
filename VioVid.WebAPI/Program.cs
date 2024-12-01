@@ -94,15 +94,15 @@ builder.Services.AddAuthentication(options => {
           */
          OnTokenValidated = async context =>
          {
-             string? emailClaim = context.Principal.FindFirstValue(ClaimTypes.Email);
-             if (emailClaim == null)
+             string? userIdClaim = context.Principal.FindFirstValue("UserId");
+             if (userIdClaim == null)
              {
-                 context.Fail("Token không chứa thuộc tính Email.");
+                 context.Fail("Token không chứa thuộc tính UserId.");
              }
 
              var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
 
-             ApplicationUser? user = await userManager.FindByEmailAsync(emailClaim);
+             ApplicationUser? user = await userManager.FindByIdAsync(userIdClaim);
              string? tokenVersionClaim = context.Principal.FindFirstValue("tokenVersion");
 
              if (user == null)

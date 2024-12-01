@@ -11,6 +11,7 @@ namespace VioVid.Core.Identity
 
         public UserProfile UserProfile { get; set; } = null!;
         public ICollection<UserPlan> UserPlans { get; set; } = null!;
+        public ICollection<MyFilm> MyFilms { get; set; } = null!;
     }
 }
 

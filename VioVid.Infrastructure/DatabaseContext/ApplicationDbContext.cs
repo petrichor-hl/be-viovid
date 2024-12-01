@@ -27,6 +27,8 @@ namespace VioVid.Infrastructure.DatabaseContext
         
         public DbSet<UserProfile> UserProfiles { get; set; }
         
+        public DbSet<MyFilm> MyFilms { get; set; }
+        
         public ApplicationDbContext(DbContextOptions options) : base(options) { }
     }
 }

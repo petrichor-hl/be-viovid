@@ -22,7 +22,7 @@ public class JwtService : IJwtService
         DateTime expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:EXPIRATION_MINUTES"]));
     
         Claim[] claims = new Claim[] {
-            new Claim("user-id", user.Id.ToString()), // Subject (user id)
+            new Claim("UserId", user.Id.ToString()), 
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JWT unique ID
             new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()), // Issued at (date and time of token generation)
             new Claim(ClaimTypes.Email, user.Email),
