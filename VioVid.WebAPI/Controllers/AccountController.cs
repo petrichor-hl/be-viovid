@@ -49,10 +49,16 @@ public class AccountController : ControllerBase
         return Ok(ApiResult<RefreshTokenDto>.Success(await _accountService.RefreshToken(refreshTokenDto)));
     }
 
-    [HttpGet("logout")]
+    [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-        return Ok(ApiResult<bool>.Success(await _accountService.Logout(User)));
+        return Ok(ApiResult<bool>.Success(await _accountService.Logout()));
+    }
+    
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        return Ok(ApiResult<Guid>.Success(await _accountService.DeleteAccount()));
     }
 }
 

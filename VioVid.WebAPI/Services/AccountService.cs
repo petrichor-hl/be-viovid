@@ -20,13 +20,15 @@ public class AccountService : IAccountService
     private readonly IEmailSender _emailSender;
 
     private readonly IConfiguration _configuration;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AccountService(
         UserManager<ApplicationUser> userManager, 
         RoleManager<ApplicationRole> roleManager, 
         SignInManager<ApplicationUser> signInManager, 
         IJwtService jwtService, IEmailSender emailSender, 
-        IConfiguration configuration
+        IConfiguration configuration,
+        IHttpContextAccessor httpContextAccessor
     )
     {
         _userManager = userManager;
@@ -35,6 +37,7 @@ public class AccountService : IAccountService
         _jwtService = jwtService;
         _emailSender = emailSender;
         _configuration = configuration;
+        _httpContextAccessor = httpContextAccessor;
     }
     
     public async Task<Guid> Register(RegisterRequest registerRequest)
@@ -51,7 +54,6 @@ public class AccountService : IAccountService
             UserName = registerRequest.Email,   // UserName is used to log in
             UserProfile = new UserProfile()
             {
-                Id = Guid.NewGuid(),
                 Name = registerRequest.Name,
                 Avatar = "https://kpaxjjmelbqpllxenpxz.supabase.co/storage/v1/object/public/avatar/default_avt.png",
             }
@@ -151,8 +153,14 @@ public class AccountService : IAccountService
         };
     }
 
-    public async Task<bool> Logout(ClaimsPrincipal userPrincipal)
+    public async Task<bool> Logout()
     {
+        // ClaimsPrincipal userPrincipal
+        var userPrincipal = _httpContextAccessor.HttpContext?.User;
+        if (userPrincipal == null)
+        {
+            throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
+        }
         string email = userPrincipal.FindFirstValue(ClaimTypes.Email);
 
         ApplicationUser user = await _userManager.FindByEmailAsync(email);
@@ -165,5 +173,39 @@ public class AccountService : IAccountService
         await _signInManager.SignOutAsync();
 
         return true;
+    }
+
+    public async Task<Guid> DeleteAccount()
+    {
+        var user = _httpContextAccessor.HttpContext?.User;
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
+        }
+        
+        var userIdClaim = user.FindFirst("user-id");
+        if (userIdClaim == null)
+        {
+            throw new Exception("Không tìm thấy claim 'user-id' trong AccessToken.");
+        }
+        var applicationUserId = Guid.Parse(userIdClaim.Value);
+        
+        // Tìm người dùng từ cơ sở dữ liệu
+        var applicationUser = await _userManager.FindByIdAsync(applicationUserId.ToString());
+        if (applicationUser == null)
+        {
+            throw new NotFoundException("Người dùng không tồn tại.");
+        }
+        
+        // Thực hiện xóa người dùng
+        var result = await _userManager.DeleteAsync(applicationUser);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"Xóa tài khoản không thành công: {errors}");
+        }
+        
+        // Trả về ID người dùng đã bị xóa
+        return applicationUserId;
     }
 }

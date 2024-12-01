@@ -13,6 +13,7 @@ public interface IAccountService
     
     Task<RefreshTokenDto> RefreshToken(RefreshTokenDto refreshTokenDto);
     
-    Task<bool> Logout(ClaimsPrincipal userPrincipal);
+    Task<bool> Logout();
 
+    Task<Guid> DeleteAccount();
 }
