@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,18 +22,18 @@ using VioVid.WebAPI.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(options =>
-{
-    //Authorization policy
-    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-    options.Filters.Add(new AuthorizeFilter(policy));
-    // Model Validation
-    options.Filters.Add<ModelValidation>();
-})
-.AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
-});
+    {
+        //Authorization policy
+        var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+        options.Filters.Add(new AuthorizeFilter(policy));
+        // Model Validation
+        options.Filters.Add<ModelValidation>();
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+    });
 
 builder.Services.AddHttpContextAccessor();
 
@@ -41,12 +42,14 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddTransient<IEmailSender, EmailSender>()
     .AddScoped<IAccountService, AccountService>()
     .AddScoped<IGenreService, GenreService>()
+    .AddScoped<IVnPayService, VnPayService>()
+    .AddScoped<IGenreService, GenreService>()
     .AddScoped<IPlanService, PlanService>()
     .AddScoped<IPersonService, PersonService>()
     .AddScoped<ITopicService, TopicService>()
     .AddScoped<IFilmService, FilmService>()
     .AddScoped<IUserService, UserService>();
-    
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -69,73 +72,69 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
     .AddRoleStore<RoleStore<ApplicationRole, ApplicationDbContext, Guid>>();
 
-builder.Services.AddAuthentication(options => {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
- .AddJwtBearer(options => {
-     options.TokenValidationParameters = new TokenValidationParameters()
-     {
-         ValidateAudience = true,
-         ValidAudience = builder.Configuration["Jwt:Audience"],
-         ValidateIssuer = true,
-         ValidIssuer = builder.Configuration["Jwt:Issuer"],
-         ValidateLifetime = true,
-         ValidateIssuerSigningKey = true,
-         IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-     };
-     options.Events = new JwtBearerEvents
-     {
-         /*
-          * Invoked after the security token has passed validation and a ClaimsIdentity has been generated.
-          * Tức là nó phải pass những điều kiện ở trên "TokenValidationParameters"
-          * Thì OnTokenValidated mới được gọi
-          */
-         OnTokenValidated = async context =>
-         {
-             string? userIdClaim = context.Principal.FindFirstValue("UserId");
-             if (userIdClaim == null)
-             {
-                 context.Fail("Token không chứa thuộc tính UserId.");
-             }
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+        options.Events = new JwtBearerEvents
+        {
+            /*
+             * Invoked after the security token has passed validation and a ClaimsIdentity has been generated.
+             * Tức là nó phải pass những điều kiện ở trên "TokenValidationParameters"
+             * Thì OnTokenValidated mới được gọi
+             */
+            OnTokenValidated = async context =>
+            {
+                var userIdClaim = context.Principal.FindFirstValue("UserId");
+                if (userIdClaim == null) context.Fail("Token không chứa thuộc tính UserId.");
 
-             var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+                var userManager =
+                    context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
 
-             ApplicationUser? user = await userManager.FindByIdAsync(userIdClaim);
-             string? tokenVersionClaim = context.Principal.FindFirstValue("tokenVersion");
+                var user = await userManager.FindByIdAsync(userIdClaim);
+                var tokenVersionClaim = context.Principal.FindFirstValue("tokenVersion");
 
-             if (user == null)
-             {
-                 context.Fail("Không tìm thấy người dùng");
-             }
-             else if (!int.TryParse(tokenVersionClaim, out int intTokenVersion) || intTokenVersion != user.TokenVersion)
-             {
-                 context.Fail("Access Token không hợp lệ.");
-             }
-         },
-         /* Invoked before a challenge is sent back to the caller. */
-         OnChallenge = context =>
-         {
-             // Customize the response if token validation fails
-             if (!context.Handled)
-             {
-                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                 context.Response.ContentType = "application/json";
+                if (user == null)
+                    context.Fail("Không tìm thấy người dùng");
+                else if (!int.TryParse(tokenVersionClaim, out var intTokenVersion) ||
+                         intTokenVersion != user.TokenVersion) context.Fail("Access Token không hợp lệ.");
+            },
+            /* Invoked before a challenge is sent back to the caller. */
+            OnChallenge = context =>
+            {
+                // Customize the response if token validation fails
+                if (!context.Handled)
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
 
-                 var result = JsonSerializer.Serialize(new
-                 {
-                     error = "invalid_token",
-                     error_description = context.AuthenticateFailure?.Message ?? "User authentication failed"
-                 });
+                    var result = JsonSerializer.Serialize(new
+                    {
+                        error = "invalid_token",
+                        error_description = context.AuthenticateFailure?.Message ?? "User authentication failed"
+                    });
 
-                 return context.Response.WriteAsync(result);
-             }
-             
-             return Task.CompletedTask;
-         }
-     };
- });
+                    return context.Response.WriteAsync(result);
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
