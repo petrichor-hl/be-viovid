@@ -19,10 +19,10 @@ public class JwtService : IJwtService
 
     public string GenerateAccessToken(ApplicationUser user)
     {
-        DateTime expiration = DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["Jwt:EXPIRATION_MINUTES"]));
+        DateTime expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:EXPIRATION_MINUTES"]));
     
         Claim[] claims = new Claim[] {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()), // Subject (user id)
+            new Claim("user-id", user.Id.ToString()), // Subject (user id)
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JWT unique ID
             new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()), // Issued at (date and time of token generation)
             new Claim(ClaimTypes.Email, user.Email),
