@@ -155,7 +155,6 @@ public class AccountService : IAccountService
 
     public async Task<bool> Logout()
     {
-        // ClaimsPrincipal userPrincipal
         var userPrincipal = _httpContextAccessor.HttpContext?.User;
         if (userPrincipal == null)
         {
