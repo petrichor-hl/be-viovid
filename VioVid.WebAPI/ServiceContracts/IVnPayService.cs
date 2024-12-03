@@ -1,9 +1,9 @@
-using Application.DTOs.Payment;
+using VioVid.Core.Entities;
 
 namespace VioVid.WebAPI.ServiceContracts;
 
 public interface IVnPayService
 {
-    Task<string> CreatePaymentUrl(CreatePaymentRequest createPaymentRequest, HttpContext context);
+    Task<string> CreatePaymentUrl(Payment payment, HttpContext context);
     Task<bool> VerifyPayment(Dictionary<string, string> vnpParams);
 }

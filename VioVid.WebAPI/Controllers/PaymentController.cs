@@ -10,21 +10,27 @@ namespace VioVid.WebAPI.Controllers;
 [ApiController]
 public class PaymentController : ControllerBase
 {
+    private readonly IPaymentService _paymentService;
     private readonly IVnPayService _vnPayService;
 
-    public PaymentController(IVnPayService vnPayService)
+    public PaymentController(IVnPayService vnPayService, IPaymentService paymentService)
     {
         _vnPayService = vnPayService;
+        _paymentService = paymentService;
     }
 
     [HttpPost("vn-pay")]
     public async Task<IActionResult> CreateVnPayPaymentUrl(CreatePaymentRequest createPaymentRequest)
     {
+        //Create payment
+        var payment = await _paymentService.CreatePayment(createPaymentRequest);
+        Console.WriteLine(payment);
+
         // Access HttpContext directly
         var context = HttpContext;
 
         // Generate the payment URL via the VnPayService
-        var paymentUrl = await _vnPayService.CreatePaymentUrl(createPaymentRequest, context);
+        var paymentUrl = await _vnPayService.CreatePaymentUrl(payment, context);
 
         // Return the result wrapped in ApiResult
         return Ok(ApiResult<string>.Success(paymentUrl));
