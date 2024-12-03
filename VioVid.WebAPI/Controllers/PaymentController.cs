@@ -11,12 +11,14 @@ namespace VioVid.WebAPI.Controllers;
 public class PaymentController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
+    private readonly IStripeService _stripeService;
     private readonly IVnPayService _vnPayService;
 
-    public PaymentController(IVnPayService vnPayService, IPaymentService paymentService)
+    public PaymentController(IVnPayService vnPayService, IPaymentService paymentService, IStripeService stripeService)
     {
         _vnPayService = vnPayService;
         _paymentService = paymentService;
+        _stripeService = stripeService;
     }
 
     [HttpPost("vn-pay")]
@@ -36,16 +38,36 @@ public class PaymentController : ControllerBase
         return Ok(ApiResult<string>.Success(paymentUrl));
     }
 
-
-    [HttpGet("vn-pay-callback")]
-    [AllowAnonymous]
-    public async Task<IActionResult> VnPayCallback([FromQuery] Dictionary<string, string> vnpParams)
+    [HttpPost("stripe")]
+    public async Task<IActionResult> CreateStripePaymentUrl(CreatePaymentRequest createPaymentRequest)
     {
-        // Verify payment using the VnPayService
-        var isValid = await _vnPayService.VerifyPayment(vnpParams);
+        //Create payment
+        var payment = await _paymentService.CreatePayment(createPaymentRequest);
+        Console.WriteLine(payment);
 
-        if (isValid) return Ok(ApiResult<string>.Success("Payment was successful!"));
+        // Access HttpContext directly
+        var context = HttpContext;
 
+        // Generate the payment URL via the VnPayService
+        var paymentUrl = await _stripeService.CreatePaymentSession(payment);
+
+        // Return the result wrapped in ApiResult
+        return Ok(ApiResult<string>.Success(paymentUrl));
+    }
+
+    [HttpGet("stripe-callback-success")]
+    [AllowAnonymous]
+    public async Task<IActionResult> StripeCallbackSuccess([FromQuery] string session_id)
+    {
+        var isSuccess = await _stripeService.Success(session_id);
+        if (isSuccess) return Ok(ApiResult<string>.Success("Payment was successful!"));
         return BadRequest(ApiResult<string>.Success("Payment failed!"));
+    }
+
+    [HttpGet("stripe-callback-cancelled")]
+    [AllowAnonymous]
+    public async Task<IActionResult> StripeCallbackCancelled([FromQuery] string session_id)
+    {
+        return BadRequest(ApiResult<string>.Success("Payment was cancelled!"));
     }
 }
