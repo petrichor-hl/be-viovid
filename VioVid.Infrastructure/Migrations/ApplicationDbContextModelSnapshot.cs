@@ -307,6 +307,29 @@ namespace VioVid.Infrastructure.Migrations
                     b.ToTable("MyFilms");
                 });
 
+            modelBuilder.Entity("VioVid.Core.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Payments");
+                });
+
             modelBuilder.Entity("VioVid.Core.Entities.Person", b =>
                 {
                     b.Property<Guid>("Id")
@@ -329,6 +352,9 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uuid");
+
                     b.Property<double>("Popularity")
                         .HasColumnType("double precision");
 
@@ -336,6 +362,8 @@ namespace VioVid.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
 
                     b.ToTable("Persons");
                 });
@@ -356,10 +384,15 @@ namespace VioVid.Infrastructure.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Price")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
 
                     b.ToTable("Plans");
                 });
@@ -746,6 +779,20 @@ namespace VioVid.Infrastructure.Migrations
                     b.Navigation("Film");
                 });
 
+            modelBuilder.Entity("VioVid.Core.Entities.Person", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.Payment", null)
+                        .WithMany("User")
+                        .HasForeignKey("PaymentId");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.Plan", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.Payment", null)
+                        .WithMany("Plan")
+                        .HasForeignKey("PaymentId");
+                });
+
             modelBuilder.Entity("VioVid.Core.Entities.Review", b =>
                 {
                     b.HasOne("VioVid.Core.Identity.ApplicationUser", "ApplicationUser")
@@ -843,6 +890,13 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.Genre", b =>
                 {
                     b.Navigation("GenreFilms");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.Payment", b =>
+                {
+                    b.Navigation("Plan");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Person", b =>
