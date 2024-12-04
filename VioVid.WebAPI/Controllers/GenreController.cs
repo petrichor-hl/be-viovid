@@ -1,5 +1,6 @@
 using Application.DTOs;
 using Application.DTOs.Genre;
+using Application.DTOs.Genre.Res;
 using Microsoft.AspNetCore.Mvc;
 using VioVid.Core.Entities;
 using VioVid.WebAPI.ServiceContracts;
@@ -26,7 +27,7 @@ public class GenreController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetGenreById(Guid id)
     {
-        return Ok(ApiResult<Genre>.Success(await _genreService.GetByIdAsync(id)));
+        return Ok(ApiResult<GenreResponse>.Success(await _genreService.GetByIdAsync(id)));
     }
     
     [HttpPost]

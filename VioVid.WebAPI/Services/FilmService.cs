@@ -1,5 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using Application.DTOs.Film;
 using Application.DTOs.Film.Req;
 using Application.DTOs.Film.Res;
 using Application.Exceptions;
@@ -88,7 +86,7 @@ public class FilmService : IFilmService
                     Name = season.Name,
                 }).ToList(),
             Genres = film.GenreFilms
-                .Select(genreFilm => new GenreResponse
+                .Select(genreFilm => new SimpleGenreResponse
                 {
                     Id = genreFilm.Id,
                     Name = genreFilm.Genre.Name,

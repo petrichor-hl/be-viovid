@@ -1,4 +1,6 @@
+using Application.DTOs.Film.Res;
 using Application.DTOs.Genre;
+using Application.DTOs.Genre.Res;
 using Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Entities;
@@ -21,14 +23,27 @@ public class GenreService : IGenreService
         return await _dbContext.Genres.ToListAsync();
     }
 
-    public async Task<Genre> GetByIdAsync(Guid id)
+    public async Task<GenreResponse> GetByIdAsync(Guid id)
     {
-        var genre = await _dbContext.Genres.FindAsync(id);
+        var genre = await _dbContext.Genres
+            .Include(genre => genre.GenreFilms)
+                .ThenInclude(genreFilm => genreFilm.Film)
+            .FirstOrDefaultAsync(genre => genre.Id == id);
         if (genre == null)
         {
             throw new NotFoundException($"Không tìm thấy Genre có id {id}");
         }
-        return genre;
+        return new GenreResponse
+        {
+            Id = genre.Id,
+            Name = genre.Name,
+            Films = genre.GenreFilms.Select(genreFilm => new SimpleFilmResponse
+            {
+                FilmId = genreFilm.FilmId,
+                Name = genreFilm.Film.Name,
+                PosterPath = genreFilm.Film.PosterPath,
+            }).ToList()
+        };
     }
 
     public async Task<Genre> CreateGenreAsync(CreateGenreRequest createGenreRequest)

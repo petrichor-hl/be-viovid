@@ -8,5 +8,5 @@ public class FilmResponse : SimpleFilmResponse
     public DateOnly? ReleaseDate { get; set; }
     
     public List<SimpleSeasonResponse> Seasons { get; set; } = null!;
-    public List<GenreResponse> Genres { get; set; } = null!;
+    public List<SimpleGenreResponse> Genres { get; set; } = null!;
 }

@@ -1,4 +1,5 @@
 using Application.DTOs.Genre;
+using Application.DTOs.Genre.Res;
 using VioVid.Core.Entities;
 
 namespace VioVid.WebAPI.ServiceContracts;
@@ -7,7 +8,7 @@ public interface IGenreService
 {
     Task<List<Genre>> GetAllAsync();
     
-    Task<Genre> GetByIdAsync(Guid id);
+    Task<GenreResponse> GetByIdAsync(Guid id);
     
     Task<Genre> CreateGenreAsync(CreateGenreRequest createGenreRequest);
 
