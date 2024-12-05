@@ -2,7 +2,7 @@ using Application.DTOs.Film.Res;
 
 namespace Application.DTOs.Topic.Res;
 
-public class TopicFilmResponse
+public class TopicResponse
 {
     public Guid TopicId { get; set; }
     

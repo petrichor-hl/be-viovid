@@ -21,7 +21,7 @@ public class TopicController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllAsync()
     {
-        return Ok(ApiResult<List<TopicFilmResponse>>.Success(await _topicService.GetAllTopicFilmsAsync()));
+        return Ok(ApiResult<List<TopicResponse>>.Success(await _topicService.GetAllTopicFilmsAsync()));
     }
     
     [HttpPost]
@@ -30,8 +30,14 @@ public class TopicController : ControllerBase
         return Ok(ApiResult<Topic>.Success(await _topicService.CreateTopicAsync(createTopicRequest)));
     }
     
+    [HttpPost("{topicId:guid}")]
+    public async Task<IActionResult> AddFilmsToTopic(Guid topicId, [FromBody] AddFilmsToTopicRequest addFilmsToTopicRequest)
+    {
+        return Ok(ApiResult<TopicResponse>.Success(await _topicService.AddFilmsToTopicAsync(topicId, addFilmsToTopicRequest)));
+    }
+    
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateTopic(Guid id,[FromBody] UpdateTopicRequest updateTopicRequest)
+    public async Task<IActionResult> UpdateTopic(Guid id, [FromBody] UpdateTopicRequest updateTopicRequest)
     {
         return Ok(ApiResult<Topic>.Success(await _topicService.UpdateTopicAsync(id, updateTopicRequest)));
     }

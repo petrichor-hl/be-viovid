@@ -18,7 +18,7 @@ public class TopicService : ITopicService
         _dbContext = dbContext;
     }
     
-    public async Task<List<TopicFilmResponse>> GetAllTopicFilmsAsync()
+    public async Task<List<TopicResponse>> GetAllTopicFilmsAsync()
     {
         var topics = await _dbContext.Topics
             .Include(topic => topic.TopicFilms)
@@ -26,7 +26,7 @@ public class TopicService : ITopicService
             .OrderBy(topic => topic.Order)
             .ToListAsync(); // Tải dữ liệu bất đồng bộ
 
-        return topics.Select(topic => new TopicFilmResponse
+        return topics.Select(topic => new TopicResponse
         {
             TopicId = topic.Id,
             Name = topic.Name,
@@ -54,7 +54,54 @@ public class TopicService : ITopicService
         await _dbContext.SaveChangesAsync();
         return newTopic;
     }
-    
+
+    public async Task<TopicResponse> AddFilmsToTopicAsync(Guid topicId, AddFilmsToTopicRequest addFilmsToTopicRequest)
+    {
+        var topic = await _dbContext.Topics
+            .Include(topic => topic.TopicFilms)
+            .ThenInclude(topicFilm => topicFilm.Film)
+            .FirstOrDefaultAsync(topic => topic.Id == topicId);
+        if (topic == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Topic có id {topicId}");
+        }
+        
+        foreach (var filmId in addFilmsToTopicRequest.FilmIds)
+        {
+            var film = await _dbContext.Films.FindAsync(filmId);
+            if (film == null)
+            {
+                throw new NotFoundException($"Không tìm thấy Film {filmId}");
+            }
+            
+            if (topic.TopicFilms.Any(topicFilm => topicFilm.FilmId == filmId))
+            {
+                throw new DuplicateException($"Topic {topicId} đã chứa Film {filmId} rồi");
+            }
+            
+            topic.TopicFilms.Add(new TopicFilm
+            {
+                Film = film
+            });
+        }
+
+        _dbContext.Topics.Update(topic);
+        await _dbContext.SaveChangesAsync();
+
+        return new TopicResponse
+        {
+            TopicId = topic.Id,
+            Name = topic.Name,
+            Order = topic.Order,
+            Films = topic.TopicFilms.Select(topicFilm => new SimpleFilmResponse
+            {
+                FilmId = topicFilm.FilmId,
+                Name = topicFilm.Film.Name,
+                PosterPath = topicFilm.Film.PosterPath,
+            }).ToList()
+        };
+    }
+
     public async Task<Topic> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest)
     {
         var topic = await _dbContext.Topics.FindAsync(id);

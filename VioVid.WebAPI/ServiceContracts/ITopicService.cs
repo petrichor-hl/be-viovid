@@ -6,9 +6,11 @@ namespace VioVid.WebAPI.ServiceContracts;
 
 public interface ITopicService
 {
-    Task<List<TopicFilmResponse>> GetAllTopicFilmsAsync();
+    Task<List<TopicResponse>> GetAllTopicFilmsAsync();
     
     Task<Topic> CreateTopicAsync(CreateTopicRequest createTopicRequest);
+
+    Task<TopicResponse> AddFilmsToTopicAsync(Guid topicId, AddFilmsToTopicRequest addFilmsToTopicRequest);
 
     Task<Topic> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest);
 
