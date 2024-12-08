@@ -150,6 +150,29 @@ namespace VioVid.Infrastructure.Migrations
                     b.ToTable("Casts");
                 });
 
+            modelBuilder.Entity("VioVid.Core.Entities.Channel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("Channels");
+                });
+
             modelBuilder.Entity("VioVid.Core.Entities.Crew", b =>
                 {
                     b.Property<Guid>("Id")
@@ -358,12 +381,22 @@ namespace VioVid.Infrastructure.Migrations
                     b.Property<double>("Popularity")
                         .HasColumnType("double precision");
 
+                    b.Property<Guid?>("PostCommentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ProfilePath")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PaymentId");
+
+                    b.HasIndex("PostCommentId");
+
+                    b.HasIndex("PostId");
 
                     b.ToTable("Persons");
                 });
@@ -395,6 +428,73 @@ namespace VioVid.Infrastructure.Migrations
                     b.HasIndex("PaymentId");
 
                     b.ToTable("Plans");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ChannelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string[]>("Hashtags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string[]>("ImageUrls")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("Likes")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("PostCommentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostCommentId");
+
+                    b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.PostComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PostComments");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Review", b =>
@@ -713,6 +813,13 @@ namespace VioVid.Infrastructure.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("VioVid.Core.Entities.Channel", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.Post", null)
+                        .WithMany("Channel")
+                        .HasForeignKey("PostId");
+                });
+
             modelBuilder.Entity("VioVid.Core.Entities.Crew", b =>
                 {
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
@@ -784,6 +891,14 @@ namespace VioVid.Infrastructure.Migrations
                     b.HasOne("VioVid.Core.Entities.Payment", null)
                         .WithMany("User")
                         .HasForeignKey("PaymentId");
+
+                    b.HasOne("VioVid.Core.Entities.PostComment", null)
+                        .WithMany("User")
+                        .HasForeignKey("PostCommentId");
+
+                    b.HasOne("VioVid.Core.Entities.Post", null)
+                        .WithMany("User")
+                        .HasForeignKey("PostId");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Plan", b =>
@@ -791,6 +906,13 @@ namespace VioVid.Infrastructure.Migrations
                     b.HasOne("VioVid.Core.Entities.Payment", null)
                         .WithMany("Plan")
                         .HasForeignKey("PaymentId");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.Post", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.PostComment", null)
+                        .WithMany("Post")
+                        .HasForeignKey("PostCommentId");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Review", b =>
@@ -909,6 +1031,20 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.Plan", b =>
                 {
                     b.Navigation("UserPlans");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.Post", b =>
+                {
+                    b.Navigation("Channel");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.PostComment", b =>
+                {
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Season", b =>

@@ -7,9 +7,26 @@ namespace VioVid.Infrastructure.DatabaseContext;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
+    public ApplicationDbContext()
+    {
+    }
+
     public ApplicationDbContext(DbContextOptions options) : base(options)
     {
     }
+
+    // public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    // {
+    // }
+    //
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     if (!optionsBuilder.IsConfigured)
+    //     {
+    //         optionsBuilder.UseNpgsql("Host=aws-0-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.htganmgiwwqyswitxwtl;Password=uxrW*_D4X_J58sB");
+    //     }
+    // }
+
 
     public DbSet<Person> Persons { get; set; }
     public DbSet<Cast> Casts { get; set; }
@@ -34,4 +51,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<MyFilm> MyFilms { get; set; }
 
     public DbSet<Payment> Payments { get; set; }
+
+    public DbSet<Channel> Channels { get; set; }
+    public DbSet<Post> Posts { get; set; }
+    public DbSet<PostComment> PostComments { get; set; }
 }
