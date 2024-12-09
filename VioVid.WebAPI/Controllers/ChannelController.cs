@@ -1,8 +1,8 @@
 using Application.DTOs;
-using Application.DTOs.Film.Res;
-using Application.DTOs.User.Req;
-using Application.DTOs.User.Res;
+using Application.DTOs.Channel;
 using Microsoft.AspNetCore.Mvc;
+using VioVid.Core.Common;
+using VioVid.Core.Entities;
 using VioVid.WebAPI.ServiceContracts;
 
 namespace VioVid.WebAPI.Controllers;
@@ -11,35 +11,29 @@ namespace VioVid.WebAPI.Controllers;
 [ApiController]
 public class ChannelController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IChannelService _channelService;
 
-    public ChannelController(IUserService userService)
+    public ChannelController(IChannelService channelService)
     {
-        _userService = userService;
+        _channelService = channelService;
     }
 
-    [HttpGet("profile")]
-    public async Task<IActionResult> GetProfile()
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync([FromQuery] GetPagingChannelRequest getPagingChannelRequest)
     {
-        return Ok(ApiResult<UserProfileResponse>.Success(await _userService.GetUserProfileAsync()));
+        return Ok(ApiResult<PaginationResponse<Channel>>.Success(
+            await _channelService.GetAllAsync(getPagingChannelRequest)));
     }
 
-    [HttpGet("my-list")]
-    public async Task<IActionResult> GetMyList()
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetChannelById(Guid id)
     {
-        return Ok(ApiResult<List<SimpleFilmResponse>>.Success(await _userService.GetMyListAsync()));
+        return Ok(ApiResult<Channel>.Success(await _channelService.GetByIdAsync(id)));
     }
 
-    [HttpPost("my-list")]
-    public async Task<IActionResult> AddFilmToMyList(AddFilmToMyListRequest addFilmToMyListRequest)
+    [HttpPost]
+    public async Task<IActionResult> CreateChannel(CreateChannelRequest createChannelRequest)
     {
-        return Ok(
-            ApiResult<SimpleFilmResponse>.Success(await _userService.AddFilmToMyListAsync(addFilmToMyListRequest)));
-    }
-
-    [HttpDelete("my-list/{filmId:guid}")]
-    public async Task<IActionResult> AddFilmToMyList(Guid filmId)
-    {
-        return Ok(ApiResult<Guid>.Success(await _userService.RemoveFilmFromMyListByFilmIdAsync(filmId)));
+        return Ok(ApiResult<Channel>.Success(await _channelService.CreateChannelAsync(createChannelRequest)));
     }
 }
