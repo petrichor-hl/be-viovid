@@ -1,8 +1,8 @@
 using Application.DTOs;
-using Application.DTOs.Film.Res;
-using Application.DTOs.User.Req;
-using Application.DTOs.User.Res;
+using Application.DTOs.Post;
 using Microsoft.AspNetCore.Mvc;
+using VioVid.Core.Common;
+using VioVid.Core.Entities;
 using VioVid.WebAPI.ServiceContracts;
 
 namespace VioVid.WebAPI.Controllers;
@@ -11,35 +11,28 @@ namespace VioVid.WebAPI.Controllers;
 [ApiController]
 public class PostController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IPostService _postService;
 
-    public PostController(IUserService userService)
+    public PostController(IPostService postService)
     {
-        _userService = userService;
+        _postService = postService;
     }
 
-    [HttpGet("profile")]
-    public async Task<IActionResult> GetProfile()
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync([FromQuery] GetPagingPostRequest getPagingPostRequest)
     {
-        return Ok(ApiResult<UserProfileResponse>.Success(await _userService.GetUserProfileAsync()));
+        return Ok(ApiResult<PaginationResponse<Post>>.Success(await _postService.GetAllAsync(getPagingPostRequest)));
     }
 
-    [HttpGet("my-list")]
-    public async Task<IActionResult> GetMyList()
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetPostById(Guid id)
     {
-        return Ok(ApiResult<List<SimpleFilmResponse>>.Success(await _userService.GetMyListAsync()));
+        return Ok(ApiResult<Post>.Success(await _postService.GetByIdAsync(id)));
     }
 
-    [HttpPost("my-list")]
-    public async Task<IActionResult> AddFilmToMyList(AddFilmToMyListRequest addFilmToMyListRequest)
+    [HttpPost]
+    public async Task<IActionResult> CreatePost(CreatePostRequest createPostRequest)
     {
-        return Ok(
-            ApiResult<SimpleFilmResponse>.Success(await _userService.AddFilmToMyListAsync(addFilmToMyListRequest)));
-    }
-
-    [HttpDelete("my-list/{filmId:guid}")]
-    public async Task<IActionResult> AddFilmToMyList(Guid filmId)
-    {
-        return Ok(ApiResult<Guid>.Success(await _userService.RemoveFilmFromMyListByFilmIdAsync(filmId)));
+        return Ok(ApiResult<Post>.Success(await _postService.CreatePostAsync(createPostRequest)));
     }
 }
