@@ -1,8 +1,8 @@
 using Application.DTOs;
-using Application.DTOs.Film.Res;
-using Application.DTOs.User.Req;
-using Application.DTOs.User.Res;
+using Application.DTOs.PostComment;
 using Microsoft.AspNetCore.Mvc;
+using VioVid.Core.Common;
+using VioVid.Core.Entities;
 using VioVid.WebAPI.ServiceContracts;
 
 namespace VioVid.WebAPI.Controllers;
@@ -11,35 +11,30 @@ namespace VioVid.WebAPI.Controllers;
 [ApiController]
 public class PostCommentController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IPostCommentService _postCommentService;
 
-    public PostCommentController(IUserService userService)
+    public PostCommentController(IPostCommentService postCommentService)
     {
-        _userService = userService;
+        _postCommentService = postCommentService;
     }
 
-    [HttpGet("profile")]
-    public async Task<IActionResult> GetProfile()
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync([FromQuery] GetPagingPostCommentRequest getPagingPostCommentRequest)
     {
-        return Ok(ApiResult<UserProfileResponse>.Success(await _userService.GetUserProfileAsync()));
+        return Ok(ApiResult<PaginationResponse<PostComment>>.Success(
+            await _postCommentService.GetAllAsync(getPagingPostCommentRequest)));
     }
 
-    [HttpGet("my-list")]
-    public async Task<IActionResult> GetMyList()
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetPostCommentById(Guid id)
     {
-        return Ok(ApiResult<List<SimpleFilmResponse>>.Success(await _userService.GetMyListAsync()));
+        return Ok(ApiResult<PostComment>.Success(await _postCommentService.GetByIdAsync(id)));
     }
 
-    [HttpPost("my-list")]
-    public async Task<IActionResult> AddFilmToMyList(AddFilmToMyListRequest addFilmToMyListRequest)
+    [HttpPost]
+    public async Task<IActionResult> CreatePostComment(Guid filmId, CreatePostCommentRequest createPostCommentRequest)
     {
-        return Ok(
-            ApiResult<SimpleFilmResponse>.Success(await _userService.AddFilmToMyListAsync(addFilmToMyListRequest)));
-    }
-
-    [HttpDelete("my-list/{filmId:guid}")]
-    public async Task<IActionResult> AddFilmToMyList(Guid filmId)
-    {
-        return Ok(ApiResult<Guid>.Success(await _userService.RemoveFilmFromMyListByFilmIdAsync(filmId)));
+        return Ok(ApiResult<PostComment>.Success(
+            await _postCommentService.CreatePostCommentAsync(createPostCommentRequest)));
     }
 }
