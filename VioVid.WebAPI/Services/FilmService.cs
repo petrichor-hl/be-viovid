@@ -115,17 +115,19 @@ public class FilmService : IFilmService
         {
             Id = season.Id,
             Name = season.Name,
-            Episodes = season.Episodes.Select(episode => new EpisodeResponse
-            {
-                Id = episode.Id,
-                Order = episode.Order,
-                Title = episode.Title,
-                Summary = episode.Summary,
-                Source = episode.Source,
-                Duration = episode.Duration,
-                StillPath = episode.StillPath,
-                IsFree = episode.IsFree,
-            }).ToList(),
+            Episodes = season.Episodes
+                .OrderBy(episode => episode.Order)
+                .Select(episode => new EpisodeResponse
+                {
+                    Id = episode.Id,
+                    Order = episode.Order,
+                    Title = episode.Title,
+                    Summary = episode.Summary,
+                    Source = episode.Source,
+                    Duration = episode.Duration,
+                    StillPath = episode.StillPath,
+                    IsFree = episode.IsFree,
+                }).ToList(),
         };
     }
 

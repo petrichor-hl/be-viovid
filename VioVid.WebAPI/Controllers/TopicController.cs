@@ -30,10 +30,16 @@ public class TopicController : ControllerBase
         return Ok(ApiResult<Topic>.Success(await _topicService.CreateTopicAsync(createTopicRequest)));
     }
     
-    [HttpPost("{topicId:guid}")]
+    [HttpPost("{topicId:guid}/add-films")]
     public async Task<IActionResult> AddFilmsToTopic(Guid topicId, [FromBody] AddFilmsToTopicRequest addFilmsToTopicRequest)
     {
         return Ok(ApiResult<TopicResponse>.Success(await _topicService.AddFilmsToTopicAsync(topicId, addFilmsToTopicRequest)));
+    }
+    
+    [HttpPost("{topicId:guid}/remove-films")]
+    public async Task<IActionResult> RemoveFilmsFromTopic(Guid topicId, [FromBody] RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest)
+    {
+        return Ok(ApiResult<TopicResponse>.Success(await _topicService.RemoveFilmsFromTopicAsync(topicId, removeFilmsFromTopicRequest)));
     }
     
     [HttpPut("{id:guid}")]
