@@ -204,6 +204,7 @@ public class FilmService : IFilmService
             .Select(cast => new SimpleCastResponse
             {
                 CastId = cast.Id,
+                PersonId = cast.PersonId,
                 Character = cast.Character,
                 PersonName = cast.Person.Name,
                 PersonProfilePath = cast.Person.ProfilePath,
@@ -225,6 +226,7 @@ public class FilmService : IFilmService
             .Select(crew => new SimpleCrewReponse
             {
                 CrewId = crew.Id,
+                PersonId = crew.PersonId,
                 Role = crew.Role,
                 PersonName = crew.Person.Name,
                 PersonProfilePath = crew.Person.ProfilePath,
