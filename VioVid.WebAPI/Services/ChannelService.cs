@@ -60,6 +60,7 @@ public class ChannelService : IChannelService
         var newChannel = new Channel
         {
             Name = createChannelRequest.Name,
+            Description = createChannelRequest.Description,
             CreatedAt = DateTime.UtcNow
         };
 
