@@ -31,13 +31,6 @@ public class FilmController : ControllerBase
     {
         return Ok(ApiResult<FilmResponse>.Success(await _filmService.GetByIdAsync(id)));
     }
-
-    
-    [HttpGet("{filmId:guid}/seasons/{seasonId:guid}")]
-    public async Task<IActionResult> GetSeasons(Guid filmId, Guid seasonId)
-    {
-        return Ok(ApiResult<SeasonResponse>.Success(await _filmService.GetSeasonsAsync(filmId, seasonId)));
-    }
     
     [HttpGet("{filmId:guid}/reviews")]
     public async Task<IActionResult> GetReviews(Guid filmId)

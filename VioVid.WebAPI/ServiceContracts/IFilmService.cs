@@ -11,8 +11,6 @@ public interface IFilmService
     
     Task<FilmResponse> GetByIdAsync(Guid id);
     
-    Task<SeasonResponse> GetSeasonsAsync(Guid filmId, Guid seasonId);
-    
     Task<List<ReviewResponse>> GetReviewsAsync(Guid id);
     
     Task<ReviewResponse> PostReview(Guid filmId, PostReviewRequest postReviewRequest);

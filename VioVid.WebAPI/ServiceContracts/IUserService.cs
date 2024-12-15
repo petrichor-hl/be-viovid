@@ -13,4 +13,8 @@ public interface IUserService
     Task<SimpleFilmResponse> AddFilmToMyListAsync(AddFilmToMyListRequest addFilmToMyListRequest);
     
     Task<Guid> RemoveFilmFromMyListByFilmIdAsync(Guid filmId);
+    
+    Task<List<TrackingProgressResponse>> GetTrackingProgressAsync();
+    
+    Task<bool> UpdateTrackingProgressAsync(UpdateTrackingProgressRequest updateTrackingProgressRequest);
 }

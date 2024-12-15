@@ -42,4 +42,16 @@ public class UserController : ControllerBase
     {
         return Ok(ApiResult<Guid>.Success(await _userService.RemoveFilmFromMyListByFilmIdAsync(filmId)));
     }
+    
+    [HttpGet("tracking-progress")]
+    public async Task<IActionResult> GetTrackingProgress()
+    {
+        return Ok(ApiResult<List<TrackingProgressResponse>>.Success(await _userService.GetTrackingProgressAsync()));
+    }
+    
+    [HttpPost("tracking-progress")]
+    public async Task<IActionResult> UpdateTrackingProgress(UpdateTrackingProgressRequest updateTrackingProgressRequest)
+    {
+        return Ok(ApiResult<bool>.Success(await _userService.UpdateTrackingProgressAsync(updateTrackingProgressRequest)));
+    }
 }

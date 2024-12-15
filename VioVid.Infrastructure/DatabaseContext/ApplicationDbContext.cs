@@ -32,6 +32,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<UserProfile> UserProfiles { get; set; }
 
     public DbSet<MyFilm> MyFilms { get; set; }
+    
+    public DbSet<TrackingProgress> TrackingProgresses { get; set; }
 
     public DbSet<Payment> Payments { get; set; }
 }

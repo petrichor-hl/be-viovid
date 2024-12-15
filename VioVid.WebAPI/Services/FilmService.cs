@@ -58,79 +58,76 @@ public class FilmService : IFilmService
     }
 
     public async Task<FilmResponse> GetByIdAsync(Guid id)
+{
+    var film = await _dbContext.Films
+        .Include(f => f.Seasons)
+            .ThenInclude(season => season.Episodes)
+        .Include(f => f.GenreFilms)
+            .ThenInclude(genreFilm => genreFilm.Genre)
+        .FirstOrDefaultAsync(f => f.Id == id);
+
+    if (film == null)
     {
-        var film = await _dbContext.Films
-            .Include(f => f.Seasons)
-            .Include(f => f.GenreFilms)
-            .ThenInclude(genreFilm => genreFilm.Genre).
-            FirstOrDefaultAsync(f => f.Id == id);
-        if (film == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Film có id {id}");
-        }
-        return new FilmResponse
-        {
-            FilmId = film.Id,
-            Name = film.Name,
-            Overview = film.Overview,
-            PosterPath = film.PosterPath,
-            BackdropPath = film.BackdropPath,
-            ContentRating = film.ContentRating,
-            ReleaseDate = film.ReleaseDate,
-            Seasons = film.Seasons
-                .OrderBy(s => s.Order)
-                .Select(season => new SimpleSeasonResponse
-                {
-                    Id = season.Id,
-                    Order = season.Order,
-                    Name = season.Name,
-                }).ToList(),
-            Genres = film.GenreFilms
-                .Select(genreFilm => new SimpleGenreResponse
-                {
-                    Id = genreFilm.Id,
-                    Name = genreFilm.Genre.Name,
-                }).ToList(),
-        };
+        throw new NotFoundException($"Không tìm thấy Film có id {id}");
     }
 
-    public async Task<SeasonResponse> GetSeasonsAsync(Guid filmId, Guid seasonId)
-    {
-        var film = await _dbContext.Films.FindAsync(filmId);
-        if (film == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Film có id {filmId}");
-        }
-        
-        var season = await _dbContext.Seasons
-            .Include(s => s.Episodes)
-            .FirstOrDefaultAsync(s => s.Id == seasonId);
+    var user = _httpContextAccessor.HttpContext?.User;
+    var userIdClaim = user?.FindFirst("UserId");
+    var applicationUserId = Guid.Parse(userIdClaim?.Value!);
 
-        if (season == null)
+    var seasonResponses = new List<SeasonResponse>();
+    foreach (var season in film.Seasons.OrderBy(s => s.Order))
+    {
+        var episodeResponses = new List<EpisodeResponse>();
+        foreach (var episode in season.Episodes.OrderBy(e => e.Order))
         {
-            throw new NotFoundException($"Không tìm thấy Season có id {seasonId}");
+            var trackingProgress = await _dbContext.TrackingProgresses
+                .FirstOrDefaultAsync(tp => tp.ApplicationUserId == applicationUserId && tp.EpisodeId == episode.Id);
+
+            episodeResponses.Add(new EpisodeResponse
+            {
+                Id = episode.Id,
+                Order = episode.Order,
+                Title = episode.Title,
+                Summary = episode.Summary,
+                Source = episode.Source,
+                Duration = episode.Duration,
+                StillPath = episode.StillPath,
+                IsFree = episode.IsFree,
+                Progress = trackingProgress?.Progress ?? 0,
+            });
         }
-        
-        return new SeasonResponse
+
+        seasonResponses.Add(new SeasonResponse
         {
             Id = season.Id,
+            Order = season.Order,
             Name = season.Name,
-            Episodes = season.Episodes
-                .OrderBy(episode => episode.Order)
-                .Select(episode => new EpisodeResponse
-                {
-                    Id = episode.Id,
-                    Order = episode.Order,
-                    Title = episode.Title,
-                    Summary = episode.Summary,
-                    Source = episode.Source,
-                    Duration = episode.Duration,
-                    StillPath = episode.StillPath,
-                    IsFree = episode.IsFree,
-                }).ToList(),
-        };
+            Episodes = episodeResponses,
+        });
     }
 
+    var genreResponses = film.GenreFilms
+        .Select(genreFilm => new SimpleGenreResponse
+        {
+            Id = genreFilm.Genre.Id,
+            Name = genreFilm.Genre.Name,
+        })
+        .ToList();
+
+    return new FilmResponse
+    {
+        FilmId = film.Id,
+        Name = film.Name,
+        Overview = film.Overview,
+        PosterPath = film.PosterPath,
+        BackdropPath = film.BackdropPath,
+        ContentRating = film.ContentRating,
+        ReleaseDate = film.ReleaseDate,
+        Seasons = seasonResponses,
+        Genres = genreResponses,
+    };
+}
     public async Task<List<ReviewResponse>> GetReviewsAsync(Guid id)
     {
         var filmExists = await _dbContext.Films.AnyAsync(f => f.Id == id);

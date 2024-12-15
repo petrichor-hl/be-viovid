@@ -7,6 +7,6 @@ public class FilmResponse : SimpleFilmResponse
     public string ContentRating { get; set; } = null!;
     public DateOnly? ReleaseDate { get; set; }
     
-    public List<SimpleSeasonResponse> Seasons { get; set; } = null!;
+    public List<SeasonResponse> Seasons { get; set; } = null!;
     public List<SimpleGenreResponse> Genres { get; set; } = null!;
 }
