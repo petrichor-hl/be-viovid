@@ -1,3 +1,5 @@
+using VioVid.Core.Identity;
+
 namespace VioVid.Core.Entities;
 
 public class PostComment
@@ -8,6 +10,6 @@ public class PostComment
     public Guid PostId { get; set; }
     public string Content { get; set; } = null!;
 
-    public ICollection<Person> User { get; set; } = null!;
+    public ICollection<ApplicationUser> User { get; set; } = null!;
     public ICollection<Post> Post { get; set; } = null!;
 }

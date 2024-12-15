@@ -1,3 +1,5 @@
+using VioVid.Core.Identity;
+
 namespace VioVid.Core.Entities;
 
 public class Post
@@ -12,6 +14,6 @@ public class Post
     public string[] ImageUrls { get; set; } = null!;
     public int Likes { get; set; }
 
-    public ICollection<Person> User { get; set; } = null!;
+    public ICollection<ApplicationUser> User { get; set; } = null!;
     public ICollection<Channel> Channel { get; set; } = null!;
 }
