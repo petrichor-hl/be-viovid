@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Entities;
@@ -34,6 +35,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<MyFilm> MyFilms { get; set; }
     
     public DbSet<TrackingProgress> TrackingProgresses { get; set; }
+    
+    public DbSet<UserNotification> UserNotifications { get; set; }
 
     public DbSet<Payment> Payments { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.Entity<UserNotification>(entity =>
+        {
+            entity.Property(n => n.Params)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<Dictionary<string, object>>(v, (JsonSerializerOptions)null));
+        });
+    }
 }

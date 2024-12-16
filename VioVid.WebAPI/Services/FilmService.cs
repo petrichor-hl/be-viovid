@@ -4,6 +4,7 @@ using Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
+using VioVid.Core.Enum;
 using VioVid.Infrastructure.DatabaseContext;
 using VioVid.WebAPI.ServiceContracts;
 
@@ -235,6 +236,7 @@ public class FilmService : IFilmService
     {
         var newFilm = new Film
         {
+            Id = Guid.NewGuid(),
             Name = createFilmRequest.Name,
             Overview = createFilmRequest.Overview,
             PosterPath = createFilmRequest.PosterPath,
@@ -276,8 +278,27 @@ public class FilmService : IFilmService
             }).ToList(),
             Reviews = new List<Review>(),
         };
+
+        var newNoti = new UserNotification
+        {
+            Category = NotificationCategory.Film,
+            CreatedDateTime = DateTime.UtcNow,
+            ReadStatus = NotificationReadStatus.UnRead,
+            Title = "Phim mới vừa được thêm!",
+            Body = $"Phim {newFilm.Name} đã sẵn sàng để bạn thưởng thức.",
+            Params = new Dictionary<string, object>
+            {
+                { "filmId", newFilm.Id },
+                { "name", newFilm.Name },
+                { "overview", newFilm.Overview },
+                { "backdropPath", newFilm.BackdropPath },
+                { "contentRating", newFilm.ContentRating },
+            }
+        };
         
         await _dbContext.Films.AddAsync(newFilm);
+        await _dbContext.UserNotifications.AddAsync(newNoti);
+        
         await _dbContext.SaveChangesAsync();
         return newFilm;
     }
