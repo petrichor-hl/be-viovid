@@ -147,7 +147,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Casts");
+                    b.ToTable("Casts", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Crew", b =>
@@ -172,7 +172,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Crews");
+                    b.ToTable("Crews", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Episode", b =>
@@ -213,7 +213,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("SeasonId");
 
-                    b.ToTable("Episodes");
+                    b.ToTable("Episodes", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Film", b =>
@@ -247,7 +247,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Films");
+                    b.ToTable("Films", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Genre", b =>
@@ -262,7 +262,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.GenreFilm", b =>
@@ -283,7 +283,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("GenreFilms");
+                    b.ToTable("GenreFilms", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.MyFilm", b =>
@@ -304,7 +304,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("FilmId");
 
-                    b.ToTable("MyFilms");
+                    b.ToTable("MyFilms", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Payment", b =>
@@ -327,7 +327,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Person", b =>
@@ -365,7 +365,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("Persons");
+                    b.ToTable("Persons", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Plan", b =>
@@ -394,7 +394,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("Plans");
+                    b.ToTable("Plans", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Review", b =>
@@ -425,7 +425,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("FilmId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Season", b =>
@@ -448,7 +448,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("FilmId");
 
-                    b.ToTable("Seasons");
+                    b.ToTable("Seasons", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Topic", b =>
@@ -466,7 +466,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Topics");
+                    b.ToTable("Topics", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.TopicFilm", b =>
@@ -487,7 +487,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("TopicFilms");
+                    b.ToTable("TopicFilms", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.TrackingProgress", b =>
@@ -511,7 +511,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("EpisodeId");
 
-                    b.ToTable("TrackingProgresses");
+                    b.ToTable("TrackingProgresses", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.UserNotification", b =>
@@ -546,7 +546,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserNotifications");
+                    b.ToTable("UserNotifications", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.UserPlan", b =>
@@ -573,7 +573,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PlanId");
 
-                    b.ToTable("UserPlans");
+                    b.ToTable("UserPlans", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.UserProfile", b =>
@@ -598,7 +598,7 @@ namespace VioVid.Infrastructure.Migrations
                     b.HasIndex("ApplicationUserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfiles");
+                    b.ToTable("UserProfiles", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Identity.ApplicationRole", b =>

@@ -8,6 +8,6 @@ public class Payment
     public DateTime CreatedAt { get; set; }
     public Boolean IsDone { get; set; }
     
-    public ICollection<Person> User { get; set; } = null!;
+    // public ICollection<Person> User { get; set; } = null!;
     public ICollection<Plan> Plan { get; set; } = null!;
 }
