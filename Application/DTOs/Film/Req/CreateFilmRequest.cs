@@ -46,7 +46,7 @@ public class SeasonRequest
     
     public int? Order { get; set; }
     
-    [Required]
+    // [Required]
     public string Name { get; set; } = string.Empty;
     
     [JsonPropertyName("episodes")]
@@ -62,7 +62,7 @@ public class EpisodeRequest
     [Required]
     public string Title { get; set; } = string.Empty;
     
-    [Required]
+    // [Required]
     public string Summary { get; set; } = string.Empty;
     
     [Required]
@@ -71,7 +71,7 @@ public class EpisodeRequest
     [Required]
     public int Duration { get; set; }
     
-    [Required]
+    // [Required]
     public string StillPath { get; set; } = string.Empty;
     
     [Required]

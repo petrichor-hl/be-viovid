@@ -4,6 +4,7 @@ using Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
+using VioVid.Core.Enum;
 using VioVid.Infrastructure.DatabaseContext;
 using VioVid.WebAPI.ServiceContracts;
 
@@ -58,64 +59,33 @@ public class FilmService : IFilmService
     }
 
     public async Task<FilmResponse> GetByIdAsync(Guid id)
+{
+    var film = await _dbContext.Films
+        .Include(f => f.Seasons)
+            .ThenInclude(season => season.Episodes)
+        .Include(f => f.GenreFilms)
+            .ThenInclude(genreFilm => genreFilm.Genre)
+        .FirstOrDefaultAsync(f => f.Id == id);
+
+    if (film == null)
     {
-        var film = await _dbContext.Films
-            .Include(f => f.Seasons)
-            .Include(f => f.GenreFilms)
-            .ThenInclude(genreFilm => genreFilm.Genre).
-            FirstOrDefaultAsync(f => f.Id == id);
-        if (film == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Film có id {id}");
-        }
-        return new FilmResponse
-        {
-            FilmId = film.Id,
-            Name = film.Name,
-            Overview = film.Overview,
-            PosterPath = film.PosterPath,
-            BackdropPath = film.BackdropPath,
-            ContentRating = film.ContentRating,
-            ReleaseDate = film.ReleaseDate,
-            Seasons = film.Seasons
-                .OrderBy(s => s.Order)
-                .Select(season => new SimpleSeasonResponse
-                {
-                    Id = season.Id,
-                    Order = season.Order,
-                    Name = season.Name,
-                }).ToList(),
-            Genres = film.GenreFilms
-                .Select(genreFilm => new SimpleGenreResponse
-                {
-                    Id = genreFilm.Id,
-                    Name = genreFilm.Genre.Name,
-                }).ToList(),
-        };
+        throw new NotFoundException($"Không tìm thấy Film có id {id}");
     }
 
-    public async Task<SeasonResponse> GetSeasonsAsync(Guid filmId, Guid seasonId)
-    {
-        var film = await _dbContext.Films.FindAsync(filmId);
-        if (film == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Film có id {filmId}");
-        }
-        
-        var season = await _dbContext.Seasons
-            .Include(s => s.Episodes)
-            .FirstOrDefaultAsync(s => s.Id == seasonId);
+    var user = _httpContextAccessor.HttpContext?.User;
+    var userIdClaim = user?.FindFirst("UserId");
+    var applicationUserId = Guid.Parse(userIdClaim?.Value!);
 
-        if (season == null)
+    var seasonResponses = new List<SeasonResponse>();
+    foreach (var season in film.Seasons.OrderBy(s => s.Order))
+    {
+        var episodeResponses = new List<EpisodeResponse>();
+        foreach (var episode in season.Episodes.OrderBy(e => e.Order))
         {
-            throw new NotFoundException($"Không tìm thấy Season có id {seasonId}");
-        }
-        
-        return new SeasonResponse
-        {
-            Id = season.Id,
-            Name = season.Name,
-            Episodes = season.Episodes.Select(episode => new EpisodeResponse
+            var trackingProgress = await _dbContext.TrackingProgresses
+                .FirstOrDefaultAsync(tp => tp.ApplicationUserId == applicationUserId && tp.EpisodeId == episode.Id);
+
+            episodeResponses.Add(new EpisodeResponse
             {
                 Id = episode.Id,
                 Order = episode.Order,
@@ -125,10 +95,40 @@ public class FilmService : IFilmService
                 Duration = episode.Duration,
                 StillPath = episode.StillPath,
                 IsFree = episode.IsFree,
-            }).ToList(),
-        };
+                Progress = trackingProgress?.Progress ?? 0,
+            });
+        }
+
+        seasonResponses.Add(new SeasonResponse
+        {
+            Id = season.Id,
+            Order = season.Order,
+            Name = season.Name,
+            Episodes = episodeResponses,
+        });
     }
 
+    var genreResponses = film.GenreFilms
+        .Select(genreFilm => new SimpleGenreResponse
+        {
+            Id = genreFilm.Genre.Id,
+            Name = genreFilm.Genre.Name,
+        })
+        .ToList();
+
+    return new FilmResponse
+    {
+        FilmId = film.Id,
+        Name = film.Name,
+        Overview = film.Overview,
+        PosterPath = film.PosterPath,
+        BackdropPath = film.BackdropPath,
+        ContentRating = film.ContentRating,
+        ReleaseDate = film.ReleaseDate,
+        Seasons = seasonResponses,
+        Genres = genreResponses,
+    };
+}
     public async Task<List<ReviewResponse>> GetReviewsAsync(Guid id)
     {
         var filmExists = await _dbContext.Films.AnyAsync(f => f.Id == id);
@@ -202,6 +202,7 @@ public class FilmService : IFilmService
             .Select(cast => new SimpleCastResponse
             {
                 CastId = cast.Id,
+                PersonId = cast.PersonId,
                 Character = cast.Character,
                 PersonName = cast.Person.Name,
                 PersonProfilePath = cast.Person.ProfilePath,
@@ -223,6 +224,7 @@ public class FilmService : IFilmService
             .Select(crew => new SimpleCrewReponse
             {
                 CrewId = crew.Id,
+                PersonId = crew.PersonId,
                 Role = crew.Role,
                 PersonName = crew.Person.Name,
                 PersonProfilePath = crew.Person.ProfilePath,
@@ -234,6 +236,7 @@ public class FilmService : IFilmService
     {
         var newFilm = new Film
         {
+            Id = Guid.NewGuid(),
             Name = createFilmRequest.Name,
             Overview = createFilmRequest.Overview,
             PosterPath = createFilmRequest.PosterPath,
@@ -275,8 +278,27 @@ public class FilmService : IFilmService
             }).ToList(),
             Reviews = new List<Review>(),
         };
+
+        var newNoti = new UserNotification
+        {
+            Category = NotificationCategory.Film,
+            CreatedDateTime = DateTime.UtcNow,
+            ReadStatus = NotificationReadStatus.UnRead,
+            Title = "Phim mới vừa được thêm!",
+            Body = $"Phim {newFilm.Name} đã sẵn sàng để bạn thưởng thức.",
+            Params = new Dictionary<string, object>
+            {
+                { "filmId", newFilm.Id },
+                { "name", newFilm.Name },
+                { "overview", newFilm.Overview },
+                { "backdropPath", newFilm.BackdropPath },
+                { "contentRating", newFilm.ContentRating },
+            }
+        };
         
         await _dbContext.Films.AddAsync(newFilm);
+        await _dbContext.UserNotifications.AddAsync(newNoti);
+        
         await _dbContext.SaveChangesAsync();
         return newFilm;
     }

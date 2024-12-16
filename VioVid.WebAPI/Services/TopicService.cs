@@ -102,6 +102,48 @@ public class TopicService : ITopicService
         };
     }
 
+    public async Task<TopicResponse> RemoveFilmsFromTopicAsync(Guid topicId, RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest)
+    {
+        var topic = await _dbContext.Topics
+            .Include(topic => topic.TopicFilms)
+            .ThenInclude(topicFilm => topicFilm.Film)
+            .FirstOrDefaultAsync(topic => topic.Id == topicId);
+        if (topic == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Topic có id {topicId}");
+        }
+        
+        foreach (var filmId in removeFilmsFromTopicRequest.FilmIds)
+        {
+            var topicFilm =
+                topic.TopicFilms.FirstOrDefault(topicFilm =>
+                    topicFilm.TopicId == topicId && topicFilm.FilmId == filmId);
+            
+            if (topicFilm == null)
+            {
+                throw new NotFoundException($"Topic {topicId} không tồn tại Film {filmId}");
+            } 
+            
+            topic.TopicFilms.Remove(topicFilm);
+        }
+
+        _dbContext.Topics.Update(topic);
+        await _dbContext.SaveChangesAsync();
+
+        return new TopicResponse
+        {
+            TopicId = topic.Id,
+            Name = topic.Name,
+            Order = topic.Order,
+            Films = topic.TopicFilms.Select(topicFilm => new SimpleFilmResponse
+            {
+                FilmId = topicFilm.FilmId,
+                Name = topicFilm.Film.Name,
+                PosterPath = topicFilm.Film.PosterPath,
+            }).ToList()
+        };
+    }
+    
     public async Task<Topic> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest)
     {
         var topic = await _dbContext.Topics.FindAsync(id);

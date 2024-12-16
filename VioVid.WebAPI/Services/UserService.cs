@@ -131,4 +131,53 @@ public class UserService : IUserService
         
         return filmId;
     }
+
+    public async Task<List<TrackingProgressResponse>> GetTrackingProgressAsync()
+    {
+        var user = _httpContextAccessor.HttpContext?.User!;
+        var userIdClaim = user.FindFirst("UserId");
+        var applicationUserId = Guid.Parse(userIdClaim!.Value);
+
+        return await _dbContext.TrackingProgresses
+            .Where(trackingProgress => trackingProgress.ApplicationUserId == applicationUserId)
+            .Select(tp => new TrackingProgressResponse
+            {
+                EpisodeId = tp.EpisodeId,
+                Progress = tp.Progress,
+            }).ToListAsync();
+    }
+
+    public async Task<bool> UpdateTrackingProgressAsync(UpdateTrackingProgressRequest updateTrackingProgressRequest)
+    {
+        var user = _httpContextAccessor.HttpContext?.User!;
+        var userIdClaim = user.FindFirst("UserId");
+        var applicationUserId = Guid.Parse(userIdClaim!.Value);
+
+        var trackingProgress = await _dbContext.TrackingProgresses
+            .FirstOrDefaultAsync(tl => tl.EpisodeId == updateTrackingProgressRequest.EpisodeId && tl.ApplicationUserId == applicationUserId);
+
+        if (trackingProgress == null)
+        {
+            if (await _dbContext.Episodes.AnyAsync(episode => episode.Id == updateTrackingProgressRequest.EpisodeId))
+            {
+                await _dbContext.TrackingProgresses.AddAsync(new TrackingProgress
+                {
+                    ApplicationUserId = applicationUserId,
+                    EpisodeId = updateTrackingProgressRequest.EpisodeId,
+                    Progress = updateTrackingProgressRequest.Progress,
+                });
+            }
+            else
+            {
+                throw new InvalidModelException($"Không tìm thấy Episode {updateTrackingProgressRequest.EpisodeId}");
+            }
+        }
+        else
+        {
+            trackingProgress.Progress = updateTrackingProgressRequest.Progress;
+        }
+        
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
 }

@@ -10,4 +10,5 @@ public class EpisodeResponse
     public int Duration { get; set; }
     public string StillPath { get; set; } = null!;
     public bool IsFree { get; set; }
+    public int Progress { get; set; }
 }

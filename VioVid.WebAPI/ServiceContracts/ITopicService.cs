@@ -12,6 +12,9 @@ public interface ITopicService
 
     Task<TopicResponse> AddFilmsToTopicAsync(Guid topicId, AddFilmsToTopicRequest addFilmsToTopicRequest);
 
+    Task<TopicResponse>
+        RemoveFilmsFromTopicAsync(Guid topicId, RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest);
+
     Task<Topic> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest);
 
     Task<Guid> DeleteTopicAsync(Guid id);
