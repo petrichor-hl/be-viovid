@@ -2,6 +2,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +20,11 @@ using VioVid.WebAPI.Filters;
 using VioVid.WebAPI.Middlewares;
 using VioVid.WebAPI.ServiceContracts;
 using VioVid.WebAPI.Services;
+
+FirebaseApp.Create(new AppOptions
+{
+    Credential = GoogleCredential.FromFile("viovid-fe752-firebase-adminsdk-8fx32-e3f47e5ea5.json")
+});
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +62,9 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddScoped<IPostCommentService, PostCommentService>()
     .AddScoped<IChannelService, ChannelService>()
     .AddScoped<IUserService, UserService>()
-    .AddScoped<INotificationService, NotificationService>();
+    .AddScoped<INotificationService, NotificationService>()
+    .AddScoped<INotificationService, NotificationService>()
+    .AddScoped<IPushNotificationService, PushNotificationService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
