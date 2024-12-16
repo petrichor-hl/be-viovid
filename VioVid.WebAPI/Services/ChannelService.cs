@@ -11,14 +11,19 @@ namespace VioVid.WebAPI.Services;
 public class ChannelService : IChannelService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ChannelService(ApplicationDbContext dbContext)
+
+    public ChannelService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
     {
         _dbContext = dbContext;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<PaginationResponse<Channel>> GetAllAsync(GetPagingChannelRequest getPagingChannelRequest)
     {
+        Console.WriteLine("Total Records: ");
+
         var pageIndex = getPagingChannelRequest.PageIndex;
         var pageSize = getPagingChannelRequest.PageSize;
         var searchText = getPagingChannelRequest.SearchText?.ToLower();
@@ -37,7 +42,7 @@ public class ChannelService : IChannelService
             .Skip(pageIndex * pageSize)
             .Take(pageSize)
             .ToListAsync();
-
+        Console.WriteLine($"Total Records: {totalRecords}");
         return new PaginationResponse<Channel>
         {
             TotalCount = totalRecords,
@@ -65,6 +70,15 @@ public class ChannelService : IChannelService
         };
 
         await _dbContext.Channels.AddAsync(newChannel);
+
+
+        var user = _httpContextAccessor.HttpContext?.User!;
+        var userIdClaim = user.FindFirst("UserId");
+        var applicationUserId = Guid.Parse(userIdClaim!.Value);
+
+        var userObj = await _dbContext.Users.FindAsync(applicationUserId);
+        if (applicationUserId != Guid.Empty) userObj!.Channels.Add(newChannel);
+
         await _dbContext.SaveChangesAsync();
         return newChannel;
     }

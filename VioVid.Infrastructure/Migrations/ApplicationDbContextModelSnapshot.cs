@@ -22,6 +22,36 @@ namespace VioVid.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserPost", b =>
+                {
+                    b.Property<Guid>("PostsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PostsId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ApplicationUserPost");
+                });
+
+            modelBuilder.Entity("ApplicationUserPostComment", b =>
+                {
+                    b.Property<Guid>("PostCommentsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PostCommentsId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ApplicationUserPostComment");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -156,8 +186,15 @@ namespace VioVid.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ApplicationUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -167,6 +204,8 @@ namespace VioVid.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("PostId");
 
@@ -375,28 +414,13 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("PaymentId")
-                        .HasColumnType("uuid");
-
                     b.Property<double>("Popularity")
                         .HasColumnType("double precision");
-
-                    b.Property<Guid?>("PostCommentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("PostId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("ProfilePath")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PaymentId");
-
-                    b.HasIndex("PostCommentId");
-
-                    b.HasIndex("PostId");
 
                     b.ToTable("Persons");
                 });
@@ -765,6 +789,9 @@ namespace VioVid.Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
@@ -799,7 +826,39 @@ namespace VioVid.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
+                    b.HasIndex("PaymentId");
+
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("ApplicationUserPost", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VioVid.Core.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ApplicationUserPostComment", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.PostComment", null)
+                        .WithMany()
+                        .HasForeignKey("PostCommentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VioVid.Core.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -874,6 +933,10 @@ namespace VioVid.Infrastructure.Migrations
 
             modelBuilder.Entity("VioVid.Core.Entities.Channel", b =>
                 {
+                    b.HasOne("VioVid.Core.Identity.ApplicationUser", null)
+                        .WithMany("Channels")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("VioVid.Core.Entities.Post", null)
                         .WithMany("Channel")
                         .HasForeignKey("PostId");
@@ -943,21 +1006,6 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Film");
-                });
-
-            modelBuilder.Entity("VioVid.Core.Entities.Person", b =>
-                {
-                    b.HasOne("VioVid.Core.Entities.Payment", null)
-                        .WithMany("User")
-                        .HasForeignKey("PaymentId");
-
-                    b.HasOne("VioVid.Core.Entities.PostComment", null)
-                        .WithMany("User")
-                        .HasForeignKey("PostCommentId");
-
-                    b.HasOne("VioVid.Core.Entities.Post", null)
-                        .WithMany("User")
-                        .HasForeignKey("PostId");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Plan", b =>
@@ -1072,6 +1120,13 @@ namespace VioVid.Infrastructure.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
+            modelBuilder.Entity("VioVid.Core.Identity.ApplicationUser", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.Payment", null)
+                        .WithMany("User")
+                        .HasForeignKey("PaymentId");
+                });
+
             modelBuilder.Entity("VioVid.Core.Entities.Film", b =>
                 {
                     b.Navigation("Casts");
@@ -1114,15 +1169,11 @@ namespace VioVid.Infrastructure.Migrations
             modelBuilder.Entity("VioVid.Core.Entities.Post", b =>
                 {
                     b.Navigation("Channel");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.PostComment", b =>
                 {
                     b.Navigation("Post");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Season", b =>
@@ -1137,6 +1188,8 @@ namespace VioVid.Infrastructure.Migrations
 
             modelBuilder.Entity("VioVid.Core.Identity.ApplicationUser", b =>
                 {
+                    b.Navigation("Channels");
+
                     b.Navigation("MyFilms");
 
                     b.Navigation("UserPlans");

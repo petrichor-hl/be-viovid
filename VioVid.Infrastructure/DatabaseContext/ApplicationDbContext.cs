@@ -12,9 +12,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
     }
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    public ApplicationDbContext(DbContextOptions options) : base(options)
     {
     }
+
+    // public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    // {
+    // }
+    //
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     if (!optionsBuilder.IsConfigured)
+    //     {
+    //         optionsBuilder.UseNpgsql("Host=aws-0-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.htganmgiwwqyswitxwtl;Password=uxrW*_D4X_J58sB");
+    //     }
+    // }
 
 
     public DbSet<Person> Persons { get; set; }
@@ -48,6 +60,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<TrackingProgress> TrackingProgresses { get; set; }
 
     public DbSet<UserNotification> UserNotifications { get; set; }
+
+
+    public DbSet<UserChannel> UserChannels { get; set; }
     //
     // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     // {
@@ -66,5 +81,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
                     v => JsonSerializer.Deserialize<Dictionary<string, object>>(v, (JsonSerializerOptions)null));
         });
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+            optionsBuilder.UseNpgsql(
+                "Host=aws-0-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.htganmgiwwqyswitxwtl;Password=uxrW*_D4X_J58sB");
     }
 }

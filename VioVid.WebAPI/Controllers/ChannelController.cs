@@ -21,6 +21,7 @@ public class ChannelController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllAsync([FromQuery] GetPagingChannelRequest getPagingChannelRequest)
     {
+        Console.WriteLine($"GetPagingChannelRequest: {getPagingChannelRequest}");
         return Ok(ApiResult<PaginationResponse<Channel>>.Success(
             await _channelService.GetAllAsync(getPagingChannelRequest)));
     }
