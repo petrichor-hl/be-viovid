@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Application.DTOs.Channel;
+using Application.DTOs.Channel.Res;
 using Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Common;
@@ -21,7 +22,7 @@ public class ChannelService : IChannelService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<PaginationResponse<Channel>> GetAllAsync(GetPagingChannelRequest getPagingChannelRequest)
+    public async Task<PaginationResponse<ChannelResponse>> GetAllAsync(GetPagingChannelRequest getPagingChannelRequest)
     {
         Console.WriteLine("Total Records: ");
 
@@ -42,9 +43,17 @@ public class ChannelService : IChannelService
         var channels = await query
             .Skip(pageIndex * pageSize)
             .Take(pageSize)
+            .Select(channel => new ChannelResponse
+            {
+                Id = channel.Id,
+                Name = channel.Name,
+                Description = channel.Description,
+                CreatedAt = channel.CreatedAt,
+            })
             .ToListAsync();
+        
         Console.WriteLine($"Total Records: {totalRecords}");
-        return new PaginationResponse<Channel>
+        return new PaginationResponse<ChannelResponse>
         {
             TotalCount = totalRecords,
             Items = channels,
@@ -53,79 +62,58 @@ public class ChannelService : IChannelService
         };
     }
 
-    public async Task<Channel> GetByIdAsync(Guid id)
+    public async Task<ChannelResponse> GetByIdAsync(Guid id)
     {
-        var channel = await _dbContext.Channels
-            .FirstOrDefaultAsync(p => p.Id == id);
-        if (channel == null) throw new NotFoundException($"Không tìm thấy Channel có id {id}");
-        return channel;
+        var channel = await _dbContext.Channels.FindAsync(id);
+        if (channel == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Channel có id {id}");
+        }
+        return new ChannelResponse
+        {
+            Id = channel.Id,
+            Name = channel.Name,
+            Description = channel.Description,
+            CreatedAt = channel.CreatedAt,
+        };
     }
 
-    public async Task<Channel> CreateChannelAsync(CreateChannelRequest createChannelRequest)
+    public async Task<ChannelResponse> CreateChannelAsync(CreateChannelRequest createChannelRequest)
     {
-        var newChannel = new Channel
-        {
-            Name = createChannelRequest.Name,
-            Description = createChannelRequest.Description,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        await _dbContext.Channels.AddAsync(newChannel);
-
-
         var user = _httpContextAccessor.HttpContext?.User!;
         Console.WriteLine($"User: {user?.Identity?.Name}");
         var userIdClaim = user.FindFirst("UserId");
         var applicationUserId = Guid.Parse(userIdClaim!.Value);
 
         Console.WriteLine($"ApplicationUserId: {applicationUserId}");
-
-
-        if (applicationUserId != Guid.Empty)
+        
+        var newChannel = new Channel
         {
-            var userObj = await _dbContext.Users.FindAsync(applicationUserId);
-
-            Console.WriteLine(JsonSerializer.Serialize(userObj));
-            try
-            {
-                if (userObj.Channels == null) userObj.Channels = new List<Channel>();
-                userObj.Channels.Add(newChannel);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
-
+            Id = Guid.NewGuid(),
+            Name = createChannelRequest.Name,
+            Description = createChannelRequest.Description,
+            CreatedAt = DateTime.UtcNow
+        };
+        
+        await _dbContext.Channels.AddAsync(newChannel);
+        await _dbContext.UserChannels.AddAsync(new UserChannel
+        {
+            ChannelId = newChannel.Id,
+            ApplicationUserId = applicationUserId
+        });
+        
         await _dbContext.SaveChangesAsync();
-        return newChannel;
+        return new ChannelResponse
+        {
+            Id = newChannel.Id,
+            Name = newChannel.Name,
+            Description = newChannel.Description,
+            CreatedAt = newChannel.CreatedAt
+        };
     }
 
-// public async Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest)
-// {
-//     var person = await _dbContext.Persons.FindAsync(id);
-//     if (person == null) throw new NotFoundException($"Không tìm thấy Person có id {id}");
-//
-//     person.Name = updatePersonRequest.Name;
-//     person.Gender = updatePersonRequest.Gender;
-//     person.Popularity = updatePersonRequest.Popularity;
-//     person.ProfilePath = updatePersonRequest.ProfilePath;
-//     person.Biography = updatePersonRequest.Biography;
-//     person.KnownForDepartment = updatePersonRequest.KnownForDepartment;
-//     person.Dob = updatePersonRequest.Dob;
-//
-//     await _dbContext.SaveChangesAsync();
-//     return person;
-// }
-//
-// public async Task<Guid> DeletePersonAsync(Guid id)
-// {
-//     var person = await _dbContext.Persons.FindAsync(id);
-//     if (person == null) throw new NotFoundException($"Không tìm thấy Person có id {id}");
-//
-//     _dbContext.Persons.Remove(person);
-//     await _dbContext.SaveChangesAsync();
-//     return id;
-// }
+    public Task<SimplePostResponse> GetListPost(CreateChannelRequest createChannelRequest)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -16,19 +16,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
     }
 
-    // public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    // {
-    // }
-    //
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    // {
-    //     if (!optionsBuilder.IsConfigured)
-    //     {
-    //         optionsBuilder.UseNpgsql("Host=aws-0-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.htganmgiwwqyswitxwtl;Password=uxrW*_D4X_J58sB");
-    //     }
-    // }
-
-
     public DbSet<Person> Persons { get; set; }
     public DbSet<Cast> Casts { get; set; }
     public DbSet<Crew> Crews { get; set; }
@@ -61,15 +48,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
     public DbSet<UserNotification> UserNotifications { get; set; }
 
-
     public DbSet<UserChannel> UserChannels { get; set; }
-    //
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    // {
-    //     if (!optionsBuilder.IsConfigured)
-    //         optionsBuilder.UseNpgsql(
-    //             "Host=aws-0-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.htganmgiwwqyswitxwtl;Password=uxrW*_D4X_J58sB");
-    // }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -83,10 +62,4 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         });
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-            optionsBuilder.UseNpgsql(
-                "Host=aws-0-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.htganmgiwwqyswitxwtl;Password=uxrW*_D4X_J58sB");
-    }
 }

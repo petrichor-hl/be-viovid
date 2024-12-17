@@ -1,5 +1,6 @@
 using Application.DTOs;
 using Application.DTOs.Channel;
+using Application.DTOs.Channel.Res;
 using Microsoft.AspNetCore.Mvc;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
@@ -22,19 +23,19 @@ public class ChannelController : ControllerBase
     public async Task<IActionResult> GetAllAsync([FromQuery] GetPagingChannelRequest getPagingChannelRequest)
     {
         Console.WriteLine($"GetPagingChannelRequest: {getPagingChannelRequest}");
-        return Ok(ApiResult<PaginationResponse<Channel>>.Success(
+        return Ok(ApiResult<PaginationResponse<ChannelResponse>>.Success(
             await _channelService.GetAllAsync(getPagingChannelRequest)));
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetChannelById(Guid id)
     {
-        return Ok(ApiResult<Channel>.Success(await _channelService.GetByIdAsync(id)));
+        return Ok(ApiResult<ChannelResponse>.Success(await _channelService.GetByIdAsync(id)));
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateChannel(CreateChannelRequest createChannelRequest)
     {
-        return Ok(ApiResult<Channel>.Success(await _channelService.CreateChannelAsync(createChannelRequest)));
+        return Ok(ApiResult<ChannelResponse>.Success(await _channelService.CreateChannelAsync(createChannelRequest)));
     }
 }

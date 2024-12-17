@@ -17,34 +17,34 @@ public class PostService : IPostService
         _dbContext = dbContext;
     }
 
-    public async Task<PaginationResponse<Post>> GetAllAsync(GetPagingPostRequest getPagingPostRequest)
-    {
-        var pageIndex = getPagingPostRequest.PageIndex;
-        var pageSize = getPagingPostRequest.PageSize;
-        var channelId = getPagingPostRequest.ChannelId;
-
-        var query = _dbContext.Posts.AsQueryable();
-
-        if (channelId != null)
-            query = query.Where(p => p.ChannelId == channelId);
-
-        // Tính tổng số lượng record
-        var totalRecords = await query.CountAsync();
-
-        // Lấy ra trang trong request cần
-        var posts = await query
-            .Skip(pageIndex * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        return new PaginationResponse<Post>
-        {
-            TotalCount = totalRecords,
-            Items = posts,
-            PageIndex = pageIndex,
-            PageSize = pageSize
-        };
-    }
+    // public async Task<PaginationResponse<Post>> GetAllAsync(GetPagingPostRequest getPagingPostRequest)
+    // {
+    //     var pageIndex = getPagingPostRequest.PageIndex;
+    //     var pageSize = getPagingPostRequest.PageSize;
+    //     var channelId = getPagingPostRequest.ChannelId;
+    //
+    //     var query = _dbContext.Posts.AsQueryable();
+    //
+    //     if (channelId != null)
+    //         query = query.Where(p => p.ChannelId == channelId);
+    //
+    //     // Tính tổng số lượng record
+    //     var totalRecords = await query.CountAsync();
+    //
+    //     // Lấy ra trang trong request cần
+    //     var posts = await query
+    //         .Skip(pageIndex * pageSize)
+    //         .Take(pageSize)
+    //         .ToListAsync();
+    //
+    //     return new PaginationResponse<Post>
+    //     {
+    //         TotalCount = totalRecords,
+    //         Items = posts,
+    //         PageIndex = pageIndex,
+    //         PageSize = pageSize
+    //     };
+    // }
 
     public async Task<Post> GetByIdAsync(Guid id)
     {
@@ -54,21 +54,22 @@ public class PostService : IPostService
         return post;
     }
 
-    public async Task<Post> CreatePostAsync(CreatePostRequest createPostRequest)
-    {
-        var post = new Post
-        {
-            ChannelId = createPostRequest.ChannelId,
-            Content = createPostRequest.Content,
-            ApplicationUserId = createPostRequest.ApplicationUserId,
-            Hashtags = createPostRequest.Hashtags,
-            ImageUrls = createPostRequest.ImageUrls
-        };
-
-        await _dbContext.Posts.AddAsync(post);
-        await _dbContext.SaveChangesAsync();
-        return post;
-    }
+    // public async Task<Post> CreatePostAsync(CreatePostRequest createPostRequest)
+    // {
+    //     var post = new Post
+    //     {
+    //         ChannelId = createPostRequest.ChannelId,
+    //         Content = createPostRequest.Content,
+    //         ApplicationUserId = createPostRequest.ApplicationUserId,
+    //         Hashtags = createPostRequest.Hashtags,
+    //         ImageUrls = createPostRequest.ImageUrls
+    //     };
+    //
+    //     await _dbContext.Posts.AddAsync(post);
+    //     await _dbContext.SaveChangesAsync();
+    //     return post;
+    // }
+    
     //
     // public async Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest)
     // {

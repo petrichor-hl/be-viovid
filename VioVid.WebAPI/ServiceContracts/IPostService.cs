@@ -6,11 +6,11 @@ namespace VioVid.WebAPI.ServiceContracts;
 
 public interface IPostService
 {
-    Task<PaginationResponse<Post>> GetAllAsync(GetPagingPostRequest getPagingPostRequest);
+    // Task<PaginationResponse<Post>> GetAllAsync(GetPagingPostRequest getPagingPostRequest);
 
     Task<Post> GetByIdAsync(Guid id);
 
-    Task<Post> CreatePostAsync(CreatePostRequest createPostRequest);
+    // Task<Post> CreatePostAsync(CreatePostRequest createPostRequest);
 
     // Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest);
     //
