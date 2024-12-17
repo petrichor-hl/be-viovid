@@ -1,5 +1,3 @@
-using VioVid.Core.Identity;
-
 namespace VioVid.Core.Entities;
 
 public class Payment

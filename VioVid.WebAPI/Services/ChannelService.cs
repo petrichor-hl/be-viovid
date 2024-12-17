@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Application.DTOs.Channel;
 using Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -73,40 +74,58 @@ public class ChannelService : IChannelService
 
 
         var user = _httpContextAccessor.HttpContext?.User!;
+        Console.WriteLine($"User: {user?.Identity?.Name}");
         var userIdClaim = user.FindFirst("UserId");
         var applicationUserId = Guid.Parse(userIdClaim!.Value);
 
-        var userObj = await _dbContext.Users.FindAsync(applicationUserId);
-        if (applicationUserId != Guid.Empty) userObj!.Channels.Add(newChannel);
+        Console.WriteLine($"ApplicationUserId: {applicationUserId}");
+
+
+        if (applicationUserId != Guid.Empty)
+        {
+            var userObj = await _dbContext.Users.FindAsync(applicationUserId);
+
+            Console.WriteLine(JsonSerializer.Serialize(userObj));
+            try
+            {
+                if (userObj.Channels == null) userObj.Channels = new List<Channel>();
+                userObj.Channels.Add(newChannel);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
 
         await _dbContext.SaveChangesAsync();
         return newChannel;
     }
 
-    // public async Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest)
-    // {
-    //     var person = await _dbContext.Persons.FindAsync(id);
-    //     if (person == null) throw new NotFoundException($"Không tìm thấy Person có id {id}");
-    //
-    //     person.Name = updatePersonRequest.Name;
-    //     person.Gender = updatePersonRequest.Gender;
-    //     person.Popularity = updatePersonRequest.Popularity;
-    //     person.ProfilePath = updatePersonRequest.ProfilePath;
-    //     person.Biography = updatePersonRequest.Biography;
-    //     person.KnownForDepartment = updatePersonRequest.KnownForDepartment;
-    //     person.Dob = updatePersonRequest.Dob;
-    //
-    //     await _dbContext.SaveChangesAsync();
-    //     return person;
-    // }
-    //
-    // public async Task<Guid> DeletePersonAsync(Guid id)
-    // {
-    //     var person = await _dbContext.Persons.FindAsync(id);
-    //     if (person == null) throw new NotFoundException($"Không tìm thấy Person có id {id}");
-    //
-    //     _dbContext.Persons.Remove(person);
-    //     await _dbContext.SaveChangesAsync();
-    //     return id;
-    // }
+// public async Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest)
+// {
+//     var person = await _dbContext.Persons.FindAsync(id);
+//     if (person == null) throw new NotFoundException($"Không tìm thấy Person có id {id}");
+//
+//     person.Name = updatePersonRequest.Name;
+//     person.Gender = updatePersonRequest.Gender;
+//     person.Popularity = updatePersonRequest.Popularity;
+//     person.ProfilePath = updatePersonRequest.ProfilePath;
+//     person.Biography = updatePersonRequest.Biography;
+//     person.KnownForDepartment = updatePersonRequest.KnownForDepartment;
+//     person.Dob = updatePersonRequest.Dob;
+//
+//     await _dbContext.SaveChangesAsync();
+//     return person;
+// }
+//
+// public async Task<Guid> DeletePersonAsync(Guid id)
+// {
+//     var person = await _dbContext.Persons.FindAsync(id);
+//     if (person == null) throw new NotFoundException($"Không tìm thấy Person có id {id}");
+//
+//     _dbContext.Persons.Remove(person);
+//     await _dbContext.SaveChangesAsync();
+//     return id;
+// }
 }
