@@ -9,7 +9,4 @@ public class PostComment
     public DateTime CreatedAt { get; set; }
     public Guid PostId { get; set; }
     public string Content { get; set; } = null!;
-
-    public ICollection<ApplicationUser> User { get; set; } = null!;
-    public ICollection<Post> Post { get; set; } = null!;
 }
