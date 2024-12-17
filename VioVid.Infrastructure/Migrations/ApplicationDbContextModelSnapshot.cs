@@ -177,39 +177,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Casts");
-                });
-
-            modelBuilder.Entity("VioVid.Core.Entities.Channel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("PostId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("Channels");
+                    b.ToTable("Casts", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Crew", b =>
@@ -234,7 +202,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Crews");
+                    b.ToTable("Crews", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Episode", b =>
@@ -275,7 +243,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("SeasonId");
 
-                    b.ToTable("Episodes");
+                    b.ToTable("Episodes", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Film", b =>
@@ -309,7 +277,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Films");
+                    b.ToTable("Films", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Genre", b =>
@@ -324,7 +292,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.GenreFilm", b =>
@@ -345,7 +313,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("GenreFilms");
+                    b.ToTable("GenreFilms", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.MyFilm", b =>
@@ -366,7 +334,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("FilmId");
 
-                    b.ToTable("MyFilms");
+                    b.ToTable("MyFilms", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Payment", b =>
@@ -414,6 +382,9 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uuid");
+
                     b.Property<double>("Popularity")
                         .HasColumnType("double precision");
 
@@ -451,7 +422,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("Plans");
+                    b.ToTable("Plans", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Post", b =>
@@ -549,7 +520,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("FilmId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Season", b =>
@@ -572,7 +543,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("FilmId");
 
-                    b.ToTable("Seasons");
+                    b.ToTable("Seasons", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Topic", b =>
@@ -590,7 +561,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Topics");
+                    b.ToTable("Topics", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.TopicFilm", b =>
@@ -611,7 +582,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("TopicFilms");
+                    b.ToTable("TopicFilms", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.TrackingProgress", b =>
@@ -635,7 +606,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasIndex("EpisodeId");
 
-                    b.ToTable("TrackingProgresses");
+                    b.ToTable("TrackingProgresses", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.UserNotification", b =>
@@ -670,7 +641,7 @@ namespace VioVid.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserNotifications");
+                    b.ToTable("UserNotifications", (string)null);
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.UserPlan", b =>
@@ -826,39 +797,7 @@ namespace VioVid.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.HasIndex("PaymentId");
-
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("ApplicationUserPost", b =>
-                {
-                    b.HasOne("VioVid.Core.Entities.Post", null)
-                        .WithMany()
-                        .HasForeignKey("PostsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VioVid.Core.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ApplicationUserPostComment", b =>
-                {
-                    b.HasOne("VioVid.Core.Entities.PostComment", null)
-                        .WithMany()
-                        .HasForeignKey("PostCommentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VioVid.Core.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -931,17 +870,6 @@ namespace VioVid.Infrastructure.Migrations
                     b.Navigation("Person");
                 });
 
-            modelBuilder.Entity("VioVid.Core.Entities.Channel", b =>
-                {
-                    b.HasOne("VioVid.Core.Identity.ApplicationUser", null)
-                        .WithMany("Channels")
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.HasOne("VioVid.Core.Entities.Post", null)
-                        .WithMany("Channel")
-                        .HasForeignKey("PostId");
-                });
-
             modelBuilder.Entity("VioVid.Core.Entities.Crew", b =>
                 {
                     b.HasOne("VioVid.Core.Entities.Film", "Film")
@@ -1006,6 +934,13 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Film");
+                });
+
+            modelBuilder.Entity("VioVid.Core.Entities.Person", b =>
+                {
+                    b.HasOne("VioVid.Core.Entities.Payment", null)
+                        .WithMany("User")
+                        .HasForeignKey("PaymentId");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Plan", b =>
@@ -1118,13 +1053,6 @@ namespace VioVid.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
-                });
-
-            modelBuilder.Entity("VioVid.Core.Identity.ApplicationUser", b =>
-                {
-                    b.HasOne("VioVid.Core.Entities.Payment", null)
-                        .WithMany("User")
-                        .HasForeignKey("PaymentId");
                 });
 
             modelBuilder.Entity("VioVid.Core.Entities.Film", b =>

@@ -63,7 +63,6 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddScoped<IChannelService, ChannelService>()
     .AddScoped<IUserService, UserService>()
     .AddScoped<INotificationService, NotificationService>()
-    .AddScoped<INotificationService, NotificationService>()
     .AddScoped<IPushNotificationService, PushNotificationService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

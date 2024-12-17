@@ -13,7 +13,4 @@ public class Post
     public string Content { get; set; }
     public string[] ImageUrls { get; set; } = null!;
     public int Likes { get; set; }
-
-    public ICollection<ApplicationUser> User { get; set; } = null!;
-    public ICollection<Channel> Channel { get; set; } = null!;
 }
