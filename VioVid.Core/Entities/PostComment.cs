@@ -2,11 +2,11 @@ using VioVid.Core.Identity;
 
 namespace VioVid.Core.Entities;
 
-public class Payment
+public class PostComment
 {
     public Guid Id { get; set; }
     public Guid ApplicationUserId { get; set; }
-    public Guid PlanId { get; set; }
     public DateTime CreatedAt { get; set; }
-    public bool IsDone { get; set; }
+    public Guid PostId { get; set; }
+    public string Content { get; set; } = null!;
 }

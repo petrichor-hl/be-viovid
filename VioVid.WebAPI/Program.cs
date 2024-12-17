@@ -58,6 +58,10 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddScoped<ITopicService, TopicService>()
     .AddScoped<IFilmService, FilmService>()
     .AddScoped<IUserService, UserService>()
+    .AddScoped<IPostService, PostService>()
+    .AddScoped<IPostCommentService, PostCommentService>()
+    .AddScoped<IChannelService, ChannelService>()
+    .AddScoped<IUserService, UserService>()
     .AddScoped<INotificationService, NotificationService>()
     .AddScoped<IPushNotificationService, PushNotificationService>();
 
