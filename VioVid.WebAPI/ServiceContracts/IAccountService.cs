@@ -12,6 +12,8 @@ public interface IAccountService
     Task<bool> ConfirmEmail(ConfirmEmailRequest confirmEmailRequest);
     
     Task<RefreshTokenDto> RefreshToken(RefreshTokenDto refreshTokenDto);
+
+    Task<bool> UpdateFcmToken(UpdateFcmTokenDto updateFcmTokenDto);
     
     Task<bool> Logout();
 
