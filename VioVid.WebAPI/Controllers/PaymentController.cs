@@ -38,6 +38,17 @@ public class PaymentController : ControllerBase
         return Ok(ApiResult<string>.Success(paymentUrl));
     }
 
+    [HttpGet("vn-pay-callback")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VnPayCallback([FromQuery] Dictionary<string, string> vnpParams)
+    {
+        // Verify payment using the VnPayService
+        var isValid = await _vnPayService.VerifyPayment(vnpParams);
+
+        if (isValid) return Ok(ApiResult<string>.Success("Payment was successful!"));
+
+        return BadRequest(ApiResult<string>.Success("Payment failed!"));
+    }
 
     [HttpPost("stripe")]
     public async Task<IActionResult> CreateStripePaymentUrl(CreatePaymentRequest createPaymentRequest)
