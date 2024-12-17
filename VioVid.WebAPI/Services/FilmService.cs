@@ -164,6 +164,7 @@ public class FilmService : IFilmService
         var film = await _dbContext.Films
             .Include(f => f.Reviews)
             .FirstOrDefaultAsync(f => f.Id == filmId);
+        
         if (film == null)
         {
             throw new NotFoundException($"Không tìm thấy Film có id {filmId}");
