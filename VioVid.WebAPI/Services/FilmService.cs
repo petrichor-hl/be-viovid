@@ -14,11 +14,13 @@ public class FilmService : IFilmService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IPushNotificationService _pushNotificationService;
     
-    public FilmService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+    public FilmService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor, IPushNotificationService pushNotificationService)
     {
         _dbContext = dbContext;
         _httpContextAccessor = httpContextAccessor;
+        _pushNotificationService = pushNotificationService;
     }
     
     public async Task<PaginationResponse<SimpleFilmResponse>> GetAllAsync(GetPagingFilmRequest getPagingFilmRequest)
@@ -295,6 +297,14 @@ public class FilmService : IFilmService
                 { "contentRating", newFilm.ContentRating },
             }
         };
+
+        var dataPayload = new Dictionary<string, string>
+        {
+            { "type", "NewFilm" },
+            { "filmId", newFilm.Id.ToString() },
+        };
+        
+        await _pushNotificationService.PushNotificationToTopicAsync(newNoti.Title, newNoti.Body, dataPayload, "NewFilm");
         
         await _dbContext.Films.AddAsync(newFilm);
         await _dbContext.UserNotifications.AddAsync(newNoti);
