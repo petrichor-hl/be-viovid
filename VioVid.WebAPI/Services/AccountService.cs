@@ -153,6 +153,17 @@ public class AccountService : IAccountService
         };
     }
 
+    public async Task<bool> UpdateFcmToken(UpdateFcmTokenDto updateFcmTokenDto)
+    {
+        var userPrincipal = _httpContextAccessor.HttpContext?.User;
+        var userId = userPrincipal.FindFirstValue("UserId");
+        var user = await _userManager.FindByIdAsync(userId!);
+        
+        user.FcmToken = updateFcmTokenDto.FcmToken;
+        var result = await _userManager.UpdateAsync(user);
+        return result.Succeeded;
+    }
+
     public async Task<bool> Logout()
     {
         var userPrincipal = _httpContextAccessor.HttpContext?.User;

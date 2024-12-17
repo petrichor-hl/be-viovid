@@ -48,6 +48,12 @@ public class AccountController : ControllerBase
     {
         return Ok(ApiResult<RefreshTokenDto>.Success(await _accountService.RefreshToken(refreshTokenDto)));
     }
+    
+    [HttpPut("update-fcm-token")]
+    public async Task<IActionResult> UpdateFcmToken(UpdateFcmTokenDto updateFcmTokenDto)
+    {
+        return Ok(ApiResult<bool>.Success(await _accountService.UpdateFcmToken(updateFcmTokenDto)));
+    }
 
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
