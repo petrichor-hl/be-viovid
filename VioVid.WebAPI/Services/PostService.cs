@@ -1,4 +1,5 @@
 using Application.DTOs.Post;
+using Application.DTOs.Post.Res;
 using Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Common;
@@ -46,12 +47,41 @@ public class PostService : IPostService
     //     };
     // }
 
-    public async Task<Post> GetByIdAsync(Guid id)
+    public async Task<PostResponse> GetByIdAsync(Guid id)
     {
         var post = await _dbContext.Posts
-            .FirstOrDefaultAsync(p => p.Id == id);
-        if (post == null) throw new NotFoundException($"Không tìm thấy Post có id {id}");
-        return post;
+            .Include(post => post.ApplicationUser)
+                .ThenInclude(applicationUser => applicationUser.UserProfile)
+            .Include(post => post.PostComments)
+                .ThenInclude(comment => comment.ApplicationUser)
+                    .ThenInclude(applicationUser => applicationUser.UserProfile)
+            .FirstOrDefaultAsync(post => post.Id == id);
+        
+        if (post == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Post có id {id}");
+        }
+        
+        return new PostResponse
+        {
+            Id = post.Id,
+            OwnerName = post.ApplicationUser.UserProfile.Name,
+            OwnerAvatar = post.ApplicationUser.UserProfile.Avatar,
+            CreatedAt = post.CreatedAt,
+            UpdatedAt = post.UpdatedAt,
+            Hashtags = post.Hashtags,
+            Content = post.Content,
+            ImageUrls = post.ImageUrls,
+            Likes = post.Likes,
+            Comments = post.PostComments.Select(comment => new PostCommentResponse
+            {
+                Id = comment.Id,
+                CreatedAt = comment.CreatedAt,
+                Content = comment.Content,
+                UserName = comment.ApplicationUser.UserProfile.Name,
+                UserAvatar = comment.ApplicationUser.UserProfile.Avatar,
+            }).ToList(),
+        };
     }
 
     // public async Task<Post> CreatePostAsync(CreatePostRequest createPostRequest)

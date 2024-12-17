@@ -14,7 +14,7 @@ public interface IChannelService
     Task<ChannelResponse> CreateChannelAsync(CreateChannelRequest createChannelRequest);
     
     // HERE
-    Task<SimplePostResponse> GetListPost(CreateChannelRequest createChannelRequest);
+    Task<PaginationResponse<SimplePostResponse>> GetListPost(Guid channelId);
 
     // Task<Channel> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest);
 }

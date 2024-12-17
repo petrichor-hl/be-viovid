@@ -112,8 +112,14 @@ public class ChannelService : IChannelService
         };
     }
 
-    public Task<SimplePostResponse> GetListPost(CreateChannelRequest createChannelRequest)
+    public async Task<PaginationResponse<SimplePostResponse>> GetListPost(Guid channelId)
     {
+        var channel = await _dbContext.Channels
+            .Include(channel => channel.Posts)
+            .FirstOrDefaultAsync(channel => channel.Id == channelId);
+        
+        // Implement Paging ...
+        
         throw new NotImplementedException();
     }
 }

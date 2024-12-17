@@ -1,5 +1,6 @@
 using Application.DTOs;
 using Application.DTOs.Post;
+using Application.DTOs.Post.Res;
 using Microsoft.AspNetCore.Mvc;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
@@ -27,7 +28,7 @@ public class PostController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetPostById(Guid id)
     {
-        return Ok(ApiResult<Post>.Success(await _postService.GetByIdAsync(id)));
+        return Ok(ApiResult<PostResponse>.Success(await _postService.GetByIdAsync(id)));
     }
 
     // [HttpPost]
