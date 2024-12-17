@@ -4,9 +4,6 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 
-# Firebase AdminSDK KEY
-viovid-fe752-firebase-adminsdk-8fx32-e3f47e5ea5.json
-
 # User-specific files
 *.rsuser
 *.suo
