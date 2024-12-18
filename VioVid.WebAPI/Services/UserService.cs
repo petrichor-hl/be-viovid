@@ -46,6 +46,7 @@ public class UserService : IUserService
             Name = applicationUser.UserProfile.Name,
             Email = applicationUser.Email,
             Avatar = applicationUser.UserProfile.Avatar,
+            FcmToken = applicationUser.FcmToken,
         };
 
         var latestUserPlan = applicationUser.UserPlans.OrderBy(userPlan => userPlan.StartDate).LastOrDefault();
