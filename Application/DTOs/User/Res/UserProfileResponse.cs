@@ -10,4 +10,6 @@ public class UserProfileResponse
     public string PlanName { get; set; } = null!;
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
+    
+    public string? FcmToken { get; set; }
 }

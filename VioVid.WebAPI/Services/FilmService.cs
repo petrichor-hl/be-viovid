@@ -305,12 +305,14 @@ public class FilmService : IFilmService
             { "filmId", newFilm.Id.ToString() },
         };
         
-        await _pushNotificationService.PushNotificationToTopicAsync(newNoti.Title, newNoti.Body, dataPayload, "NewFilm");
-        
+        // Lưu Film trước khi Push notification
         await _dbContext.Films.AddAsync(newFilm);
         await _dbContext.UserNotifications.AddAsync(newNoti);
-        
         await _dbContext.SaveChangesAsync();
+        
+        // Push notification
+        await _pushNotificationService.PushNotificationToTopicAsync(newNoti.Title, newNoti.Body, dataPayload, "NewFilm");
+
         return newFilm;
     }
 
