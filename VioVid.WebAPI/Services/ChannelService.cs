@@ -24,8 +24,6 @@ public class ChannelService : IChannelService
 
     public async Task<PaginationResponse<ChannelResponse>> GetAllAsync(GetPagingChannelRequest getPagingChannelRequest)
     {
-        Console.WriteLine("Total Records: ");
-
         var pageIndex = getPagingChannelRequest.PageIndex;
         var pageSize = getPagingChannelRequest.PageSize;
         var searchText = getPagingChannelRequest.SearchText?.ToLower();
@@ -48,11 +46,12 @@ public class ChannelService : IChannelService
                 Id = channel.Id,
                 Name = channel.Name,
                 Description = channel.Description,
-                CreatedAt = channel.CreatedAt,
+                CreatedAt = channel.CreatedAt
             })
             .ToListAsync();
-        
+
         Console.WriteLine($"Total Records: {totalRecords}");
+        Console.WriteLine($"Detail: {JsonSerializer.Serialize(channels)}");
         return new PaginationResponse<ChannelResponse>
         {
             TotalCount = totalRecords,
@@ -65,16 +64,13 @@ public class ChannelService : IChannelService
     public async Task<ChannelResponse> GetByIdAsync(Guid id)
     {
         var channel = await _dbContext.Channels.FindAsync(id);
-        if (channel == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Channel có id {id}");
-        }
+        if (channel == null) throw new NotFoundException($"Không tìm thấy Channel có id {id}");
         return new ChannelResponse
         {
             Id = channel.Id,
             Name = channel.Name,
             Description = channel.Description,
-            CreatedAt = channel.CreatedAt,
+            CreatedAt = channel.CreatedAt
         };
     }
 
@@ -86,7 +82,7 @@ public class ChannelService : IChannelService
         var applicationUserId = Guid.Parse(userIdClaim!.Value);
 
         Console.WriteLine($"ApplicationUserId: {applicationUserId}");
-        
+
         var newChannel = new Channel
         {
             Id = Guid.NewGuid(),
@@ -94,14 +90,14 @@ public class ChannelService : IChannelService
             Description = createChannelRequest.Description,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         await _dbContext.Channels.AddAsync(newChannel);
         await _dbContext.UserChannels.AddAsync(new UserChannel
         {
             ChannelId = newChannel.Id,
             ApplicationUserId = applicationUserId
         });
-        
+
         await _dbContext.SaveChangesAsync();
         return new ChannelResponse
         {
@@ -117,9 +113,9 @@ public class ChannelService : IChannelService
         var channel = await _dbContext.Channels
             .Include(channel => channel.Posts)
             .FirstOrDefaultAsync(channel => channel.Id == channelId);
-        
+
         // Implement Paging ...
-        
+
         throw new NotImplementedException();
     }
 }

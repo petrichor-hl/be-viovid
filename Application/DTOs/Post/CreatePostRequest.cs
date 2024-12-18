@@ -4,7 +4,6 @@ namespace Application.DTOs.Post;
 
 public class CreatePostRequest
 {
-    [Required] public Guid ApplicationUserId { get; set; }
 
     [Required] public Guid ChannelId { get; set; }
 
