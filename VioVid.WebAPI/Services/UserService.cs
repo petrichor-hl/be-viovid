@@ -181,4 +181,42 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> AddUserPayment(AddUserPaymentRequest addUserPaymentRequest)
+    {
+        var user = _httpContextAccessor.HttpContext?.User!;
+        var userIdClaim = user.FindFirst("UserId");
+        var applicationUserId = Guid.Parse(userIdClaim!.Value);
+        
+        var applicationUser = await _dbContext.Users
+            .Include(u => u.UserPlans) // Eager loading UserPlans
+            .Include(u => u.Payments)
+            .FirstOrDefaultAsync(u => u.Id == applicationUserId);
+        
+        var plan = await _dbContext.Plans.FindAsync(addUserPaymentRequest.PlanId);
+
+        if (plan == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Plan {addUserPaymentRequest.PlanId}");
+        }
+        
+        applicationUser!.UserPlans.Add(new UserPlan
+        {
+            ApplicationUserId = applicationUserId,
+            PlanId = plan.Id,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration)),
+        });
+        
+        applicationUser.Payments.Add(new Payment
+        {
+            ApplicationUserId = applicationUserId,
+            PlanId = plan.Id,
+            CreatedAt = DateTime.UtcNow,
+            IsDone = true
+        });
+        
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
 }

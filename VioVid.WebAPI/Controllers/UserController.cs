@@ -54,4 +54,11 @@ public class UserController : ControllerBase
     {
         return Ok(ApiResult<bool>.Success(await _userService.UpdateTrackingProgressAsync(updateTrackingProgressRequest)));
     }
+    
+    // Just ignore this endpoint
+    [HttpPost("user-payments")]
+    public async Task<IActionResult> AddUserPayment(AddUserPaymentRequest addUserPaymentRequest)
+    {
+        return Ok(ApiResult<bool>.Success(await _userService.AddUserPayment(addUserPaymentRequest)));
+    }
 }
