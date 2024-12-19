@@ -17,6 +17,10 @@ public interface IPostService
 
     Task<Post> CreatePostAsync(CreatePostRequest createPostRequest);
 
+    Task<Post> LikePostAsync(Guid postId);
+
+    Task<Post> UnlikePostAsync(Guid postId);
+
     // Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest);
     //
     // Task<Guid> DeletePersonAsync(Guid id);

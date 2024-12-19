@@ -65,13 +65,14 @@ public class PostService : IPostService
         var query = _dbContext.Posts.AsQueryable();
 
         if (channelId != null)
-            query = query.Where(p => p.ChannelId.Equals(channelId));
+            query = query.Where(p => p.ChannelId.Equals(channelId)).OrderByDescending(p => p.CreatedAt);
 
         // Tính tổng số lượng record
         var totalRecords = await query.CountAsync();
 
         // Lấy ra trang trong request cần
         var posts = await query
+            .Include(p => p.PostComments)
             .Skip(pageIndex * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -106,7 +107,7 @@ public class PostService : IPostService
                 Hashtags = createPostRequest.Hashtags,
                 ImageUrls = createPostRequest.ImageUrls,
                 Likes = 0,
-                CreatedAt = DateTime.UtcNow, 
+                CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 ApplicationUser = applicationUser!
             };
@@ -148,7 +149,47 @@ public class PostService : IPostService
         };
     }
 
-    //
+    public async Task<Post> LikePostAsync(Guid postId)
+    {
+        try
+        {
+            var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post == null)
+                throw new NotFoundException($"No post found with id {postId}");
+
+            // Increment likes
+            post.Likes++;
+            _dbContext.Posts.Update(post);
+            await _dbContext.SaveChangesAsync();
+            return post;
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Cannot like post: ", e);
+        }
+    }
+
+    public async Task<Post> UnlikePostAsync(Guid postId)
+    {
+        try
+        {
+            var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post == null)
+                throw new NotFoundException($"No post found with id {postId}");
+
+            // Decrement likes (ensure it doesn't go below 0)
+            post.Likes = Math.Max(0, post.Likes - 1);
+            _dbContext.Posts.Update(post);
+            await _dbContext.SaveChangesAsync();
+            return post;
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Cannot unlike post: ", e);
+        }
+    }
+
+    //  
     // public async Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest)
     // {
     //     var person = await _dbContext.Persons.FindAsync(id);

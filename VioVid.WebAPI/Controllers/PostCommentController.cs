@@ -1,5 +1,6 @@
 using Application.DTOs;
 using Application.DTOs.PostComment;
+using Application.Models;
 using Microsoft.AspNetCore.Mvc;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
@@ -19,10 +20,19 @@ public class PostCommentController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync([FromQuery] GetPagingPostCommentRequest getPagingPostCommentRequest)
+    public async Task<IActionResult> GetAllAsync([FromQuery] PaginationFilter filter)
     {
         return Ok(ApiResult<PaginationResponse<PostComment>>.Success(
-            await _postCommentService.GetAllAsync(getPagingPostCommentRequest)));
+            await _postCommentService.GetAllAsync(filter)));
+    }
+
+
+    [HttpGet("Post")]
+    public async Task<IActionResult> GetAllByPostAsync(
+        [FromQuery] GetPagingPostCommentRequest getPagingPostCommentRequest)
+    {
+        return Ok(ApiResult<PaginationResponse<PostComment>>.Success(
+            await _postCommentService.GetAllByPostAsync(getPagingPostCommentRequest)));
     }
 
     [HttpGet("{id:guid}")]
@@ -32,7 +42,7 @@ public class PostCommentController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatePostComment(Guid filmId, CreatePostCommentRequest createPostCommentRequest)
+    public async Task<IActionResult> CreatePostComment(CreatePostCommentRequest createPostCommentRequest)
     {
         return Ok(ApiResult<PostComment>.Success(
             await _postCommentService.CreatePostCommentAsync(createPostCommentRequest)));

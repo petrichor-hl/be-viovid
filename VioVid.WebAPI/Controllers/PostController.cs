@@ -43,7 +43,20 @@ public class PostController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePost(CreatePostRequest createPostRequest)
     {
-        Console.WriteLine("Creating post.....");
         return Ok(ApiResult<Post>.Success(await _postService.CreatePostAsync(createPostRequest)));
+    }
+
+    [HttpPost("{id:guid}/Like")]
+    public async Task<IActionResult> LikePost(Guid id)
+    {
+        await _postService.LikePostAsync(id);
+        return Ok(ApiResult<string>.Success("Post liked successfully."));
+    }
+
+    [HttpPost("{id:guid}/Unlike")]
+    public async Task<IActionResult> UnlikePost(Guid id)
+    {
+        await _postService.UnlikePostAsync(id);
+        return Ok(ApiResult<string>.Success("Post unliked successfully."));
     }
 }

@@ -1,5 +1,6 @@
 using Application.DTOs.PostComment;
 using Application.Exceptions;
+using Application.Models;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
@@ -11,23 +12,75 @@ namespace VioVid.WebAPI.Services;
 public class PostCommentService : IPostCommentService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public PostCommentService(ApplicationDbContext dbContext)
+
+    public PostCommentService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
     {
         _dbContext = dbContext;
+        _httpContextAccessor = httpContextAccessor;
     }
 
+    public async Task<PostComment> GetByIdAsync(Guid id)
+    {
+        var postComment = await _dbContext.PostComments
+            .FirstOrDefaultAsync(p => p.Id == id);
+        if (postComment == null) throw new NotFoundException($"Không tìm thấy PostComment có id {id}");
+        return postComment;
+    }
+
+    public async Task<PostComment> CreatePostCommentAsync(CreatePostCommentRequest createPostCommentRequest)
+    {
+        try
+        {
+            var user = _httpContextAccessor.HttpContext?.User!;
+            var userIdClaim = user.FindFirst("UserId");
+            var applicationUserId = Guid.Parse(userIdClaim!.Value);
+
+            var applicationUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id.Equals(applicationUserId));
+
+            // Create the new PostComment
+            var postComment = new PostComment
+            {
+                Content = createPostCommentRequest.Content,
+                ApplicationUserId = applicationUserId,
+                PostId = createPostCommentRequest.PostId,
+                CreatedAt = DateTime.UtcNow,
+                ApplicationUser = applicationUser!
+            };
+
+            // Add the PostComment to the Post's PostComments collection
+            var post = await _dbContext.Posts.Include(p => p.PostComments) // Ensure PostComments is loaded
+                .FirstOrDefaultAsync(p => p.Id == createPostCommentRequest.PostId);
+
+            if (post == null) throw new Exception("Post not found");
+
+            // Add the comment to the Post's collection
+            post.PostComments.Add(postComment);
+
+            foreach (var comment in post.PostComments)
+                Console.WriteLine($"Comment ID: {comment.Id}, Content: {comment.Content}");
+
+            // Save changes to the database
+            await _dbContext.SaveChangesAsync();
+
+            return postComment;
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Cannot create post comment: ", e);
+        }
+    }
+
+
     public async Task<PaginationResponse<PostComment>> GetAllAsync(
-        GetPagingPostCommentRequest getPagingPostCommentRequest)
+        PaginationFilter getPagingPostCommentRequest)
     {
         var pageIndex = getPagingPostCommentRequest.PageIndex;
         var pageSize = getPagingPostCommentRequest.PageSize;
-        var postId = getPagingPostCommentRequest.PostId;
 
         var query = _dbContext.PostComments.AsQueryable();
 
-        if (postId != null)
-            query = query.Where(p => p.PostId == postId);
 
         // Tính tổng số lượng record
         var totalRecords = await query.CountAsync();
@@ -47,26 +100,34 @@ public class PostCommentService : IPostCommentService
         };
     }
 
-    public async Task<PostComment> GetByIdAsync(Guid id)
+    public async Task<PaginationResponse<PostComment>> GetAllByPostAsync(
+        GetPagingPostCommentRequest getPagingPostCommentRequest)
     {
-        var postComment = await _dbContext.PostComments
-            .FirstOrDefaultAsync(p => p.Id == id);
-        if (postComment == null) throw new NotFoundException($"Không tìm thấy PostComment có id {id}");
-        return postComment;
-    }
+        var pageIndex = getPagingPostCommentRequest.PageIndex;
+        var pageSize = getPagingPostCommentRequest.PageSize;
+        var postId = getPagingPostCommentRequest.PostId;
 
-    public async Task<PostComment> CreatePostCommentAsync(CreatePostCommentRequest createPostCommentRequest)
-    {
-        var postComment = new PostComment
+        var query = _dbContext.PostComments.AsQueryable();
+
+        if (postId != null)
+            query = query.Where(p => p.PostId.Equals(postId)).OrderByDescending(p => p.CreatedAt);
+
+        // Tính tổng số lượng record
+        var totalRecords = await query.CountAsync();
+
+        // Lấy ra trang trong request cần
+        var posts = await query
+            .Skip(pageIndex * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginationResponse<PostComment>
         {
-            PostId = createPostCommentRequest.PostId,
-            ApplicationUserId = createPostCommentRequest.ApplicationUserId,
-            Content = createPostCommentRequest.Content
+            TotalCount = totalRecords,
+            Items = posts,
+            PageIndex = pageIndex,
+            PageSize = pageSize
         };
-
-        await _dbContext.PostComments.AddAsync(postComment);
-        await _dbContext.SaveChangesAsync();
-        return postComment;
     }
 
     // public async Task<Person> UpdatePersonAsync(Guid id, UpdatePersonRequest updatePersonRequest)
