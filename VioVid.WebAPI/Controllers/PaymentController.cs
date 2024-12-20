@@ -13,6 +13,7 @@ public class PaymentController : ControllerBase
     private readonly IPaymentService _paymentService;
     private readonly IStripeService _stripeService;
     private readonly IVnPayService _vnPayService;
+    
 
     public PaymentController(IVnPayService vnPayService, IPaymentService paymentService, IStripeService stripeService)
     {
@@ -26,7 +27,6 @@ public class PaymentController : ControllerBase
     {
         //Create payment
         var payment = await _paymentService.CreatePayment(createPaymentRequest);
-        Console.WriteLine(payment);
 
         // Access HttpContext directly
         var context = HttpContext;
@@ -38,16 +38,14 @@ public class PaymentController : ControllerBase
         return Ok(ApiResult<string>.Success(paymentUrl));
     }
 
-    [HttpGet("vn-pay-callback")]
+    [HttpPost("validate-vnpay-result")]
     [AllowAnonymous]
-    public async Task<IActionResult> VnPayCallback([FromQuery] Dictionary<string, string> vnpParams)
+    public async Task<IActionResult> VnPayCallback([FromBody] Dictionary<string, string> vnpParams)
     {
+        Console.WriteLine("Verify payment using the VnPayService");
         // Verify payment using the VnPayService
         var isValid = await _vnPayService.VerifyPayment(vnpParams);
-
-        if (isValid) return Ok(ApiResult<string>.Success("Payment was successful!"));
-
-        return BadRequest(ApiResult<string>.Success("Payment failed!"));
+        return Ok(ApiResult<bool>.Success(isValid));
     }
 
     [HttpPost("stripe")]

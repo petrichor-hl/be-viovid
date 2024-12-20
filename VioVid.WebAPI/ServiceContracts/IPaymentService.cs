@@ -7,5 +7,5 @@ public interface IPaymentService
 {
     Task<Payment> CreatePayment(CreatePaymentRequest createPaymentRequest);
 
-    Task<Payment> UpdatePayment(Payment payment);
+    // Task<Payment> UpdatePayment(Payment payment);
 }

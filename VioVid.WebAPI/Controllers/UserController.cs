@@ -61,4 +61,10 @@ public class UserController : ControllerBase
     {
         return Ok(ApiResult<bool>.Success(await _userService.AddUserPayment(addUserPaymentRequest)));
     }
+    
+    [HttpGet("user-payments")]
+    public async Task<IActionResult> GetUserPayments()
+    {
+        return Ok(ApiResult<List<UserPlanResponse>>.Success(await _userService.GetUserPayments()));
+    }
 }

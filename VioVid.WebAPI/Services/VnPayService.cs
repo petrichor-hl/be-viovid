@@ -9,23 +9,30 @@ using VioVid.Core.Services;
 using VioVid.Infrastructure.DatabaseContext;
 using VioVid.WebAPI.ServiceContracts;
 
+namespace VioVid.WebAPI.Services;
+
 public class VnPayService : IVnPayService
 {
     private readonly IConfiguration _configuration;
     private readonly ApplicationDbContext _dbContext;
+    private readonly IPushNotificationService _pushNotificationService;
 
-    public VnPayService(IConfiguration configuration, ApplicationDbContext dbContext)
+    public VnPayService(IConfiguration configuration, ApplicationDbContext dbContext, IPushNotificationService pushNotificationService)
     {
         _configuration = configuration;
         _dbContext = dbContext;
+        _pushNotificationService = pushNotificationService;
     }
 
     public async Task<string> CreatePaymentUrl(Payment payment, HttpContext context)
     {
-        
-        Console.WriteLine("Payment: " + JsonSerializer.Serialize(payment));
         // Get payment info
         var plan = await _dbContext.Plans.FindAsync(payment.PlanId);
+
+        if (plan == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Plan {payment.PlanId}");
+        }
 
         // Access VNPay parameters from configuration
         var vnpUrl = _configuration["Vnpay:BaseUrl"];
@@ -37,11 +44,8 @@ public class VnPayService : IVnPayService
         var vnpVersion = _configuration["Vnpay:Version"];
         var vnpLocale = _configuration["Vnpay:Locale"];
 
-
-        Console.WriteLine($"Plan details: {JsonSerializer.Serialize(plan)}");
-        Console.WriteLine($"Payment Request details: {JsonSerializer.Serialize(payment)}");
         // Replace parameters with Plan data
-        var amount = plan?.Price;
+        var amount = plan.Price;
         var orderType = plan?.Name;
         var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1"; // Extract IP address
         var createDate = DateTime.Now;
@@ -63,8 +67,7 @@ public class VnPayService : IVnPayService
         payLib.AddRequestData("vnp_OrderType", orderType!);
         payLib.AddRequestData("vnp_ReturnUrl", vnpReturnUrl);
         payLib.AddRequestData("vnp_ExpireDate", expireDate.ToString("yyyyMMddHHmmss"));
-        payLib.AddRequestData("vnp_TxnRef",
-            $"{payment.Id}");
+        payLib.AddRequestData("vnp_TxnRef", $"{payment.Id}");
 
         // Generate the payment URL using VnPayLib
         return payLib.CreateRequestUrl(vnpUrl, vnpHashSecret);
@@ -105,7 +108,7 @@ public class VnPayService : IVnPayService
 
             if (responseCode != "00") return false;
 
-            Payment? payment = null;
+            Payment? payment;
 
             // Try to parse the value from vnpParams["vnp_TxnRef"] into a Guid
             if (Guid.TryParse(vnpParams["vnp_TxnRef"], out Guid parsedPaymentId))
@@ -113,7 +116,9 @@ public class VnPayService : IVnPayService
                 Console.WriteLine($"Payment Id successfully parsed: {parsedPaymentId}");
     
                 // Now you can use parsedPaymentId to query the database or further logic
-                 payment = await _dbContext.Payments.FindAsync(parsedPaymentId);
+                 payment = await _dbContext.Payments
+                     .Include(payment => payment.ApplicationUser)
+                     .FirstOrDefaultAsync();
                 if (payment == null)
                 {
                     Console.WriteLine("No payment record found with the given PaymentId.");
@@ -131,70 +136,55 @@ public class VnPayService : IVnPayService
             Console.WriteLine($"Payment : {payment}");
             
             //Update payment status
-            payment!.IsDone = true;
-
-            var applicationUserId = payment!.ApplicationUserId;
-            var planId = payment!.PlanId;
-
+            payment.IsDone = true;
+            
+            var applicationUserId = payment.ApplicationUserId;
+            var planId = payment.PlanId;
+            
             Console.WriteLine("applicationUserId: " + applicationUserId);
             Console.WriteLine("planId: " + planId);
-
-            //Update the UserPlan 
+            
+            // Update the UserPlan 
             var plan = await _dbContext.Plans.FindAsync(planId);
 
-            Console.WriteLine("plan: " + plan!);
-
-            var existingUserPlan = await _dbContext.UserPlans
-                .FirstOrDefaultAsync(up =>
-                    up.ApplicationUserId == applicationUserId && up.PlanId == planId);
-            Console.WriteLine("existingUserPlan: " + existingUserPlan);
-            if (existingUserPlan != null)
+            if (plan == null)
             {
-                // Update the existing record
-                existingUserPlan.StartDate = DateOnly.FromDateTime(DateTime.UtcNow);
-                if (plan != null)
-                    existingUserPlan.EndDate =
-                        DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration));
-                _dbContext.UserPlans.Update(existingUserPlan);
+                return false;
             }
-            else
+            
+            var newUserPlan = new UserPlan
             {
-                Console.WriteLine("creating new UserPlan...");
-                if (applicationUserId != Guid.Empty && planId != Guid.Empty)                {
-                    var newUserPlan = new UserPlan
-                    {
-                        Id = Guid.NewGuid(),
-                        ApplicationUserId = applicationUserId,
-                        PlanId = planId,
-                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan!.Duration))
-                    };
-
-                    Console.WriteLine("newUserPlan: " + newUserPlan);
-
-                    await _dbContext.UserPlans.AddAsync(newUserPlan);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Invalid GUID values for ApplicationUserId or PlanId.");
-                }
-            }
-
-            // Increment the Order property by 1
-            plan!.Order += 1;
-            // Update the Plan in the context
-            _dbContext.Plans.Update(plan);
-
-
-            // Save changes to the database
+                ApplicationUserId = applicationUserId,
+                PlanId = planId,
+                Amount = plan.Price,
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration))
+            };
+            
+            await _dbContext.UserPlans.AddAsync(newUserPlan);
             await _dbContext.SaveChangesAsync();
+
+
+            if (payment.ApplicationUser.FcmToken == null) return true;
+            
+            var dataPayload = new Dictionary<string, string>
+            {
+                { "type", "Payment" },
+            };
+            
+            Console.WriteLine($"PushNotificationToIndividualDevice");
+            await _pushNotificationService.PushNotificationToIndividualDevice(
+                "Thanh toán thành công!", 
+                "Cảm ơn bạn đã sử dụng dịch vụ",
+                dataPayload,
+                payment.ApplicationUser.FcmToken
+            );
+
             return true;
         }
         catch (Exception ex)
         {
-            throw new InvalidModelException(ex.Message);
+            return false;
         }
-
-        return false;
     }
 }

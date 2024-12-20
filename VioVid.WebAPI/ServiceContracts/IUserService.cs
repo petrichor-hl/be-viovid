@@ -20,4 +20,6 @@ public interface IUserService
     
     // Just ignore this method
     Task<bool> AddUserPayment(AddUserPaymentRequest addUserPaymentRequest);
+    
+    Task<List<UserPlanResponse>> GetUserPayments();
 }

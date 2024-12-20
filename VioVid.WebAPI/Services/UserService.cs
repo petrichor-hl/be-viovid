@@ -204,6 +204,7 @@ public class UserService : IUserService
         {
             ApplicationUserId = applicationUserId,
             PlanId = plan.Id,
+            Amount = plan.Price,
             StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration)),
         });
@@ -218,5 +219,26 @@ public class UserService : IUserService
         
         await _dbContext.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<List<UserPlanResponse>> GetUserPayments()
+    {
+        var user = _httpContextAccessor.HttpContext?.User!;
+        var userIdClaim = user.FindFirst("UserId");
+        var applicationUserId = Guid.Parse(userIdClaim!.Value);
+        
+        var applicationUser = await _dbContext.Users
+            .Include(u => u.UserPlans)
+                .ThenInclude(userPlan => userPlan.Plan)
+            .FirstOrDefaultAsync(u => u.Id == applicationUserId);
+
+        return applicationUser!.UserPlans.Select(userPlan => new UserPlanResponse
+        {
+            UserPlanId = userPlan.Id,
+            PlanName = userPlan.Plan.Name,
+            Amount = userPlan.Amount,
+            StartDate = userPlan.StartDate,
+            EndDate = userPlan.EndDate,
+        }).ToList();
     }
 }

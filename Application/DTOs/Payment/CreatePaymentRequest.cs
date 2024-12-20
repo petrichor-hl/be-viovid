@@ -6,7 +6,4 @@ public class CreatePaymentRequest
 {
     [Required]
     public Guid PlanId { get; set; }
-    
-    [Required]
-    public Guid ApplicationUserId { get; set; }
 }

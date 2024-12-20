@@ -7,7 +7,7 @@ public class UserPlan
     public Guid Id { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
-    
+    public int Amount { get; set; }
     public Guid ApplicationUserId { get; set; }
     public Guid PlanId { get; set; }
 
