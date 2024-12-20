@@ -44,14 +44,24 @@ public class ChannelController : ControllerBase
     public async Task<IActionResult> SubscribeChannel(SubscribeChannelRequest subscribeChannelRequest)
     {
         var success = await _channelService.SubscribeAsync(subscribeChannelRequest);
-        return success ? Ok() : BadRequest();
+        return success
+            ? Ok(ApiResult<bool>.Success(true))
+            : BadRequest(ApiResult<bool>.Failure(new List<ApiResultError>
+            {
+                new(ApiResultErrorCodes.InternalServerError, "Unsubscribe failed")
+            }));
     }
 
     [HttpPost("unsubscribe")]
     public async Task<IActionResult> UnsubscribeChannel(SubscribeChannelRequest subscribeChannelRequest)
     {
         var success = await _channelService.UnsubscribeAsync(subscribeChannelRequest);
-        return success ? Ok() : BadRequest();
+        return success
+            ? Ok(ApiResult<bool>.Success(true))
+            : BadRequest(ApiResult<bool>.Failure(new List<ApiResultError>
+            {
+                new(ApiResultErrorCodes.InternalServerError, "Unsubscribe failed")
+            }));
     }
 
 

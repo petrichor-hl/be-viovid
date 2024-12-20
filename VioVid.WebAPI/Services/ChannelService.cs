@@ -71,23 +71,32 @@ public class ChannelService : IChannelService
 
     public async Task<ChannelResponse> GetByIdAsync(Guid id)
     {
-        var channel = await _dbContext.Channels.FindAsync(id);
-        if (channel == null) throw new NotFoundException($"Không tìm thấy Channel có id {id}");
-
-        return new ChannelResponse
+        try
         {
-            Id = channel.Id,
-            Name = channel.Name,
-            Description = channel.Description,
-            CreatedAt = channel.CreatedAt,
-            UserChannels = channel.UserChannels
-                .Select(userChannel => new UserChannelResponse
+            Console.WriteLine($"Id: {id}");
+            var channel = await _dbContext.Channels
+                .Include(c => c.UserChannels)
+                .FirstOrDefaultAsync(c => c.Id == id);
+            if (channel == null) throw new NotFoundException($"Không tìm thấy Channel có id {id}");
+
+            return new ChannelResponse
+            {
+                Id = channel.Id,
+                Name = channel.Name,
+                Description = channel.Description,
+                CreatedAt = channel.CreatedAt,
+                UserChannels = channel.UserChannels.Select(userChannel => new UserChannelResponse
                 {
                     ApplicationUserId = userChannel.ApplicationUserId,
                     ChannelId = userChannel.ChannelId
-                })
-                .ToList()
-        };
+                }).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
     }
 
     public async Task<ChannelResponse> CreateChannelAsync(CreateChannelRequest createChannelRequest)
