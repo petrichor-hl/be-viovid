@@ -6,4 +6,6 @@ public class ChannelResponse
     public string Name { get; set; } = null!;
     public string Description { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
+
+    public ICollection<UserChannelResponse> UserChannels { get; set; } = null!;
 }

@@ -3,7 +3,6 @@ using Application.DTOs.Channel;
 using Application.DTOs.Channel.Res;
 using Microsoft.AspNetCore.Mvc;
 using VioVid.Core.Common;
-using VioVid.Core.Entities;
 using VioVid.WebAPI.ServiceContracts;
 
 namespace VioVid.WebAPI.Controllers;
@@ -27,11 +26,34 @@ public class ChannelController : ControllerBase
             await _channelService.GetAllAsync(getPagingChannelRequest)));
     }
 
+    [HttpGet("User")]
+    public async Task<IActionResult> GetAllByUserAsync([FromQuery] GetPagingChannelRequest getPagingChannelRequest)
+    {
+        Console.WriteLine($"GetPagingChannelRequest: {getPagingChannelRequest}");
+        return Ok(ApiResult<PaginationResponse<ChannelResponse>>.Success(
+            await _channelService.GetAllByUserAsync(getPagingChannelRequest)));
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetChannelById(Guid id)
     {
         return Ok(ApiResult<ChannelResponse>.Success(await _channelService.GetByIdAsync(id)));
     }
+
+    [HttpPost("subscribe")]
+    public async Task<IActionResult> SubscribeChannel(SubscribeChannelRequest subscribeChannelRequest)
+    {
+        var success = await _channelService.SubscribeAsync(subscribeChannelRequest);
+        return success ? Ok() : BadRequest();
+    }
+
+    [HttpPost("unsubscribe")]
+    public async Task<IActionResult> UnsubscribeChannel(SubscribeChannelRequest subscribeChannelRequest)
+    {
+        var success = await _channelService.UnsubscribeAsync(subscribeChannelRequest);
+        return success ? Ok() : BadRequest();
+    }
+
 
     [HttpPost]
     public async Task<IActionResult> CreateChannel(CreateChannelRequest createChannelRequest)
