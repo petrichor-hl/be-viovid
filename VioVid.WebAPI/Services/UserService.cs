@@ -49,19 +49,20 @@ public class UserService : IUserService
             FcmToken = applicationUser.FcmToken,
         };
 
-        // TODO: FIND USER PLAN
-        // var latestUserPlan = applicationUser.UserPlans.OrderBy(userPlan => userPlan.StartDate).LastOrDefault();
-        // if (latestUserPlan == null || latestUserPlan.EndDate < DateOnly.FromDateTime(DateTime.UtcNow))
-        // {
-        //     response.PlanName = "Normal";
-        //     return response;
-        // }
-        //
-        // response.PlanName = latestUserPlan.Plan.Name;
-        // response.StartDate = latestUserPlan.StartDate;
-        // response.EndDate = latestUserPlan.EndDate;
+        var latestUserPayment = applicationUser.Payments
+            .Where(payment => payment.IsDone)
+            .OrderBy(payment => payment.StartDate)
+            .LastOrDefault();
+        if (latestUserPayment == null || latestUserPayment.EndDate < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            response.PlanName = "Normal";
+            return response;
+        }
         
-        response.PlanName = "Normal";
+        response.PlanName = latestUserPayment.Plan.Name;
+        response.StartDate = latestUserPayment.StartDate;
+        response.EndDate = latestUserPayment.EndDate;
+        
         return response;
     }
 

@@ -11,11 +11,13 @@ public class PaymentService : IPaymentService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IPushNotificationService _pushNotificationService;
 
-    public PaymentService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+    public PaymentService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor, IPushNotificationService pushNotificationService)
     {
         _dbContext = dbContext;
         _httpContextAccessor = httpContextAccessor;
+        _pushNotificationService = pushNotificationService;
     }
 
     public async Task<Payment> CreatePayment(CreatePaymentRequest createPaymentRequest)
@@ -35,5 +37,48 @@ public class PaymentService : IPaymentService
         await _dbContext.SaveChangesAsync();
 
         return newPayment;
+    }
+
+    public async Task UpdatePaymentAndPushNoti(Payment payment, int amount, bool isSuccess)
+    {
+        if (isSuccess)
+        {
+            // Thanh toán thành công
+            payment.IsDone = true;
+            payment.StartDate = DateOnly.FromDateTime(DateTime.UtcNow); 
+            payment.EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(payment.Plan.Duration));
+            payment.Amount = amount;
+            
+            await _dbContext.SaveChangesAsync();
+        }
+
+        if (payment.ApplicationUser.FcmToken == null)
+        {
+            return;
+        }
+        
+        var dataPayload = new Dictionary<string, string>
+        {
+            { "type", "Payment" },
+        };
+        
+        if (isSuccess)
+        {
+            await _pushNotificationService.PushNotificationToIndividualDevice(
+                "Thanh toán thành công!", 
+                "Cảm ơn bạn đã sử dụng dịch vụ",
+                dataPayload,
+                payment.ApplicationUser.FcmToken
+            );
+        }
+        else
+        {
+            await _pushNotificationService.PushNotificationToIndividualDevice(
+                "Thanh toán không thành công!", 
+                "Xin vui lòng kiểm tra lại sự cố",
+                dataPayload,
+                payment.ApplicationUser.FcmToken
+            );
+        }
     }
 }

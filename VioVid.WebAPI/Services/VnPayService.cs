@@ -15,13 +15,17 @@ public class VnPayService : IVnPayService
 {
     private readonly IConfiguration _configuration;
     private readonly ApplicationDbContext _dbContext;
-    private readonly IPushNotificationService _pushNotificationService;
+    private readonly IPaymentService _paymentService;
 
-    public VnPayService(IConfiguration configuration, ApplicationDbContext dbContext, IPushNotificationService pushNotificationService)
+    public VnPayService(
+        IConfiguration configuration, 
+        ApplicationDbContext dbContext, 
+        IPaymentService paymentService
+        )
     {
         _configuration = configuration;
         _dbContext = dbContext;
-        _pushNotificationService = pushNotificationService;
+        _paymentService = paymentService;
     }
 
     public async Task<string> CreatePaymentUrl(Payment payment, HttpContext context)
@@ -138,46 +142,8 @@ public class VnPayService : IVnPayService
         }
 
         var isSuccess = responseCode == "00";
-
-        if (isSuccess)
-        {
-            // Thanh toán thành công
-            payment.IsDone = true;
-            payment.StartDate = DateOnly.FromDateTime(DateTime.UtcNow); 
-            payment.EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(payment.Plan.Duration));
-            payment.Amount = int.Parse(vnpParams["vnp_Amount"]) / 100;
-            
-            await _dbContext.SaveChangesAsync();
-        }
-
-        if (payment.ApplicationUser.FcmToken == null)
-        {
-            return isSuccess;
-        }
         
-        var dataPayload = new Dictionary<string, string>
-        {
-            { "type", "Payment" },
-        };
-        
-        if (isSuccess)
-        {
-            await _pushNotificationService.PushNotificationToIndividualDevice(
-                "Thanh toán thành công!", 
-                "Cảm ơn bạn đã sử dụng dịch vụ",
-                dataPayload,
-                payment.ApplicationUser.FcmToken
-            );
-        }
-        else
-        {
-            await _pushNotificationService.PushNotificationToIndividualDevice(
-                "Thanh toán không thành công!", 
-                "Xin vui lòng kiểm tra lại sự cố",
-                dataPayload,
-                payment.ApplicationUser.FcmToken
-            );
-        }
+        await _paymentService.UpdatePaymentAndPushNoti(payment, int.Parse(vnpParams["vnp_Amount"]) / 100, isSuccess);
 
         return isSuccess;
     }

@@ -16,15 +16,13 @@ namespace VioVid.WebAPI.Services;
 public class MomoService : IMomoService
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IPushNotificationService _pushNotificationService;
     private readonly HttpClient _httpClient = new HttpClient();
+    private readonly IPaymentService _paymentService;
     
-    public MomoService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor, IPushNotificationService pushNotificationService)
+    public MomoService(ApplicationDbContext dbContext, IPaymentService paymentService)
     {
         _dbContext = dbContext;
-        _httpContextAccessor = httpContextAccessor;
-        _pushNotificationService = pushNotificationService;
+        _paymentService = paymentService;
     }
     
     public async Task<string> CreatePaymentUrl(Payment payment)
@@ -122,46 +120,8 @@ public class MomoService : IMomoService
         }
 
         var isSuccess = momoCallbackRequest.ResultCode == 0;
-
-        if (isSuccess)
-        {
-            // Thanh toán thành công
-            payment.IsDone = true;
-            payment.StartDate = DateOnly.FromDateTime(DateTime.UtcNow); 
-            payment.EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(payment.Plan.Duration));
-            payment.Amount = momoCallbackRequest.Amount;
-            
-            await _dbContext.SaveChangesAsync();
-        }
         
-        if (payment.ApplicationUser.FcmToken == null)
-        {
-            return isSuccess;
-        }
-        
-        var dataPayload = new Dictionary<string, string>
-        {
-            { "type", "Payment" },
-        };
-        
-        if (isSuccess)
-        {
-            await _pushNotificationService.PushNotificationToIndividualDevice(
-                "Thanh toán thành công!", 
-                "Cảm ơn bạn đã sử dụng dịch vụ",
-                dataPayload,
-                payment.ApplicationUser.FcmToken
-            );
-        }
-        else
-        {
-            await _pushNotificationService.PushNotificationToIndividualDevice(
-                "Thanh toán không thành công!", 
-                "Xin vui lòng kiểm tra lại sự cố",
-                dataPayload,
-                payment.ApplicationUser.FcmToken
-            );
-        }
+        await _paymentService.UpdatePaymentAndPushNoti(payment, momoCallbackRequest.Amount, isSuccess);
 
         return isSuccess;
     }
