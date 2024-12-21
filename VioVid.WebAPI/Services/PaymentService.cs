@@ -36,13 +36,4 @@ public class PaymentService : IPaymentService
 
         return newPayment;
     }
-
-    // public async Task<Payment> UpdatePayment(Payment payment)
-    // {
-    //     var oldPayment = await _dbContext.Payments.FindAsync(payment.Id);
-    //     if (oldPayment == null) throw new NotFoundException($"Không tìm thấy Payment có id {payment.Id}");
-    //     oldPayment = payment;
-    //     await _dbContext.SaveChangesAsync();
-    //     return oldPayment;
-    // }
 }

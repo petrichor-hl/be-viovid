@@ -112,8 +112,8 @@ public class MomoService : IMomoService
     public async Task<bool> HandleRecord(MomoCallbackRequest momoCallbackRequest)
     {
         var payment = await _dbContext.Payments
-            .Include(p => p.Plan)
             .Include(p => p.ApplicationUser)
+            .Include(p => p.Plan)
             .FirstOrDefaultAsync(p => p.Id == momoCallbackRequest.PaymentId);
         
         if (payment == null)
@@ -121,23 +121,22 @@ public class MomoService : IMomoService
             throw new NotFoundException($"Không tìm thấy giao dịch {momoCallbackRequest.PaymentId}");
         }
 
-        if (momoCallbackRequest.ResultCode == 0)
+        var isSuccess = momoCallbackRequest.ResultCode == 0;
+
+        if (isSuccess)
         {
+            // Thanh toán thành công
             payment.IsDone = true;
             payment.StartDate = DateOnly.FromDateTime(DateTime.UtcNow); 
             payment.EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(payment.Plan.Duration));
             payment.Amount = momoCallbackRequest.Amount;
-        }
-        else
-        {
-            payment.IsDone = false;
+            
+            await _dbContext.SaveChangesAsync();
         }
         
-        await _dbContext.SaveChangesAsync();
-
         if (payment.ApplicationUser.FcmToken == null)
         {
-            return true;
+            return isSuccess;
         }
         
         var dataPayload = new Dictionary<string, string>
@@ -145,7 +144,7 @@ public class MomoService : IMomoService
             { "type", "Payment" },
         };
         
-        if (momoCallbackRequest.ResultCode == 0)
+        if (isSuccess)
         {
             await _pushNotificationService.PushNotificationToIndividualDevice(
                 "Thanh toán thành công!", 
@@ -163,8 +162,8 @@ public class MomoService : IMomoService
                 payment.ApplicationUser.FcmToken
             );
         }
-        
-        return true;
+
+        return isSuccess;
     }
 
     private string GetSignature(String text, String key)

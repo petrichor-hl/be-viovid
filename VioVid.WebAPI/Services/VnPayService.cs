@@ -46,10 +46,10 @@ public class VnPayService : IVnPayService
 
         // Replace parameters with Plan data
         var amount = plan.Price;
-        var orderType = plan?.Name;
+        var orderType = plan.Name;
         var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1"; // Extract IP address
         var createDate = DateTime.Now;
-        var expireDate = createDate.AddDays(double.Parse((plan?.Duration ?? 0).ToString()));
+        var expireDate = createDate.AddMinutes(10);
 
         // Create instance of VnPayLib to handle request URL creation
         var payLib = new VnPayLib();
@@ -75,118 +75,110 @@ public class VnPayService : IVnPayService
 
     public async Task<bool> VerifyPayment(Dictionary<string, string> vnpParams)
     {
-        try
+        // Extract and remove the secure hash from the parameters
+        var vnpSecureHash = vnpParams["vnp_SecureHash"];
+        vnpParams.Remove("vnp_SecureHash"); // Remove the hash so it is not part of the raw data
+
+        vnpParams.Remove("vnp_SecureHashType");
+
+        var data = new StringBuilder();
+        foreach (var kv in vnpParams.OrderBy(k => k.Key))
+            if (!string.IsNullOrEmpty(kv.Value))
+            {
+                if (data.Length > 0) data.Append("&"); // Add '&' between parameters
+                data.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value));
+            }
+
+        // Final raw query string without the secure hash
+        var queryString = data.ToString();
+
+        // Log raw data for debugging
+        Console.WriteLine("Raw Data: " + queryString);
+
+        // Compute the HMAC SHA512 hash using the secret key and the raw data
+        var computedHash = VnPayLib.HmacSHA512(_configuration["Vnpay:HashSecret"], queryString);
+        
+        // Compare the computed hash with the received vnp_SecureHash
+        if (computedHash != vnpSecureHash) return false; // Signature mismatch
+
+        // Check the response code (00 indicates success)
+        var responseCode = vnpParams["vnp_ResponseCode"];
+        
+        // ---> HERE
+        
+        Payment? payment;
+        
+        // Try to parse the value from vnpParams["vnp_TxnRef"] into a Guid
+        if (Guid.TryParse(vnpParams["vnp_TxnRef"], out var parsedPaymentId))
         {
-            // Extract and remove the secure hash from the parameters
-            var vnpSecureHash = vnpParams["vnp_SecureHash"];
-            vnpParams.Remove("vnp_SecureHash"); // Remove the hash so it is not part of the raw data
+            Console.WriteLine($"Payment Id successfully parsed: {parsedPaymentId}");
 
-            vnpParams.Remove("vnp_SecureHashType");
-
-            var data = new StringBuilder();
-            foreach (var kv in vnpParams.OrderBy(k => k.Key))
-                if (!string.IsNullOrEmpty(kv.Value))
-                {
-                    if (data.Length > 0) data.Append("&"); // Add '&' between parameters
-                    data.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value));
-                }
-
-            // Final raw query string without the secure hash
-            var queryString = data.ToString();
-
-            // Log raw data for debugging
-            Console.WriteLine("Raw Data: " + queryString);
-
-            // Compute the HMAC SHA512 hash using the secret key and the raw data
-            var computedHash = VnPayLib.HmacSHA512(_configuration["Vnpay:HashSecret"], queryString);
-            
-            // Compare the computed hash with the received vnp_SecureHash
-            if (computedHash != vnpSecureHash) return false; // Signature mismatch
-
-            // Check the response code (00 indicates success)
-            var responseCode = vnpParams["vnp_ResponseCode"];
-
-            if (responseCode != "00") return false;
-
-            Payment? payment;
-
-            // Try to parse the value from vnpParams["vnp_TxnRef"] into a Guid
-            if (Guid.TryParse(vnpParams["vnp_TxnRef"], out Guid parsedPaymentId))
+            // Now you can use parsedPaymentId to query the database or further logic
+            payment = await _dbContext.Payments
+                .Include(p => p.ApplicationUser)
+                .Include(p => p.Plan)
+                .FirstOrDefaultAsync(p => p.Id == parsedPaymentId);
+            if (payment == null)
             {
-                Console.WriteLine($"Payment Id successfully parsed: {parsedPaymentId}");
-    
-                // Now you can use parsedPaymentId to query the database or further logic
-                 payment = await _dbContext.Payments
-                     .Include(p => p.ApplicationUser)
-                     .FirstOrDefaultAsync();
-                if (payment == null)
-                {
-                    Console.WriteLine("No payment record found with the given PaymentId.");
-                    return false;
-                }
-                Console.WriteLine($"Payment: {payment}");
-            }
-            else
-            {
-                Console.WriteLine("Invalid PaymentId format.");
-                return false;
+                throw new NotFoundException($"Không tìm thấy giao dịch {parsedPaymentId}");
+                // Console.WriteLine("No payment record found with the given PaymentId.");
+                // return false;
             }
 
-
-            Console.WriteLine($"Payment : {payment}");
-            
-            //Update payment status
-            payment.IsDone = true;
-            
-            var applicationUserId = payment.ApplicationUserId;
-            var planId = payment.PlanId;
-            
-            Console.WriteLine("applicationUserId: " + applicationUserId);
-            Console.WriteLine("planId: " + planId);
-            
-            // Update the UserPlan 
-            var plan = await _dbContext.Plans.FindAsync(planId);
-
-            if (plan == null)
+            if (payment.IsDone)
             {
-                return false;
+                return true;
             }
-            
-            // var newUserPlan = new UserPlan
-            // {
-            //     ApplicationUserId = applicationUserId,
-            //     PlanId = planId,
-            //     Amount = plan.Price,
-            //     StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            //     EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration))
-            // };
-            //
-            // await _dbContext.UserPlans.AddAsync(newUserPlan);
-            // await _dbContext.SaveChangesAsync();
-            //
-            //
-            // if (payment.ApplicationUser.FcmToken == null)
-            // {
-            //     return true;
-            // }
-            //
-            // var dataPayload = new Dictionary<string, string>
-            // {
-            //     { "type", "Payment" },
-            // };
-            //
-            // await _pushNotificationService.PushNotificationToIndividualDevice(
-            //     "Thanh toán thành công!", 
-            //     "Cảm ơn bạn đã sử dụng dịch vụ",
-            //     dataPayload,
-            //     payment.ApplicationUser.FcmToken
-            // );
-
-            return true;
+            Console.WriteLine($"Payment: {payment}");
         }
-        catch (Exception ex)
+        else
         {
+            Console.WriteLine("Invalid PaymentId format.");
             return false;
         }
+
+        var isSuccess = responseCode == "00";
+
+        if (isSuccess)
+        {
+            // Thanh toán thành công
+            payment.IsDone = true;
+            payment.StartDate = DateOnly.FromDateTime(DateTime.UtcNow); 
+            payment.EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(payment.Plan.Duration));
+            payment.Amount = int.Parse(vnpParams["vnp_Amount"]) / 100;
+            
+            await _dbContext.SaveChangesAsync();
+        }
+
+        if (payment.ApplicationUser.FcmToken == null)
+        {
+            return isSuccess;
+        }
+        
+        var dataPayload = new Dictionary<string, string>
+        {
+            { "type", "Payment" },
+        };
+        
+        if (isSuccess)
+        {
+            await _pushNotificationService.PushNotificationToIndividualDevice(
+                "Thanh toán thành công!", 
+                "Cảm ơn bạn đã sử dụng dịch vụ",
+                dataPayload,
+                payment.ApplicationUser.FcmToken
+            );
+        }
+        else
+        {
+            await _pushNotificationService.PushNotificationToIndividualDevice(
+                "Thanh toán không thành công!", 
+                "Xin vui lòng kiểm tra lại sự cố",
+                dataPayload,
+                payment.ApplicationUser.FcmToken
+            );
+        }
+
+        return isSuccess;
     }
 }

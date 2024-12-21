@@ -44,9 +44,7 @@ public class PaymentController : ControllerBase
     public async Task<IActionResult> VnPayCallback([FromBody] Dictionary<string, string> vnpParams)
     {
         Console.WriteLine("Verify payment using the VnPayService");
-        // Verify payment using the VnPayService
-        var isValid = await _vnPayService.VerifyPayment(vnpParams);
-        return Ok(ApiResult<bool>.Success(isValid));
+        return Ok(ApiResult<bool>.Success(await _vnPayService.VerifyPayment(vnpParams)));
     }
 
     // [HttpPost("stripe")]
