@@ -32,7 +32,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<TopicFilm> TopicFilms { get; set; }
 
     public DbSet<Plan> Plans { get; set; }
-    public DbSet<UserPlan> UserPlans { get; set; }
+    // public DbSet<UserPlan> UserPlans { get; set; }
 
     public DbSet<UserProfile> UserProfiles { get; set; }
 

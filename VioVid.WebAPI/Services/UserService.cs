@@ -31,7 +31,7 @@ public class UserService : IUserService
         // Tìm người dùng từ cơ sở dữ liệu
         var applicationUser = await _dbContext.Users
             .Include(u => u.UserProfile)
-            .Include(u => u.UserPlans) // Eager loading UserPlans
+            .Include(u => u.Payments) // Eager loading UserPlans
                 .ThenInclude(userPlans => userPlans.Plan)
             .FirstOrDefaultAsync(u => u.Id == applicationUserId);
         
@@ -49,16 +49,19 @@ public class UserService : IUserService
             FcmToken = applicationUser.FcmToken,
         };
 
-        var latestUserPlan = applicationUser.UserPlans.OrderBy(userPlan => userPlan.StartDate).LastOrDefault();
-        if (latestUserPlan == null || latestUserPlan.EndDate < DateOnly.FromDateTime(DateTime.UtcNow))
-        {
-            response.PlanName = "Normal";
-            return response;
-        }
-
-        response.PlanName = latestUserPlan.Plan.Name;
-        response.StartDate = latestUserPlan.StartDate;
-        response.EndDate = latestUserPlan.EndDate;
+        // TODO: FIND USER PLAN
+        // var latestUserPlan = applicationUser.UserPlans.OrderBy(userPlan => userPlan.StartDate).LastOrDefault();
+        // if (latestUserPlan == null || latestUserPlan.EndDate < DateOnly.FromDateTime(DateTime.UtcNow))
+        // {
+        //     response.PlanName = "Normal";
+        //     return response;
+        // }
+        //
+        // response.PlanName = latestUserPlan.Plan.Name;
+        // response.StartDate = latestUserPlan.StartDate;
+        // response.EndDate = latestUserPlan.EndDate;
+        
+        response.PlanName = "Normal";
         return response;
     }
 
@@ -182,63 +185,25 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task<bool> AddUserPayment(AddUserPaymentRequest addUserPaymentRequest)
+    public async Task<List<UserPaymentResponse>> GetUserPayments()
     {
         var user = _httpContextAccessor.HttpContext?.User!;
         var userIdClaim = user.FindFirst("UserId");
         var applicationUserId = Guid.Parse(userIdClaim!.Value);
         
         var applicationUser = await _dbContext.Users
-            .Include(u => u.UserPlans) // Eager loading UserPlans
             .Include(u => u.Payments)
-            .FirstOrDefaultAsync(u => u.Id == applicationUserId);
-        
-        var plan = await _dbContext.Plans.FindAsync(addUserPaymentRequest.PlanId);
-
-        if (plan == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Plan {addUserPaymentRequest.PlanId}");
-        }
-        
-        applicationUser!.UserPlans.Add(new UserPlan
-        {
-            ApplicationUserId = applicationUserId,
-            PlanId = plan.Id,
-            Amount = plan.Price,
-            StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration)),
-        });
-        
-        applicationUser.Payments.Add(new Payment
-        {
-            ApplicationUserId = applicationUserId,
-            PlanId = plan.Id,
-            CreatedAt = DateTime.UtcNow,
-            IsDone = true
-        });
-        
-        await _dbContext.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<List<UserPlanResponse>> GetUserPayments()
-    {
-        var user = _httpContextAccessor.HttpContext?.User!;
-        var userIdClaim = user.FindFirst("UserId");
-        var applicationUserId = Guid.Parse(userIdClaim!.Value);
-        
-        var applicationUser = await _dbContext.Users
-            .Include(u => u.UserPlans)
                 .ThenInclude(userPlan => userPlan.Plan)
             .FirstOrDefaultAsync(u => u.Id == applicationUserId);
 
-        return applicationUser!.UserPlans.Select(userPlan => new UserPlanResponse
+        return applicationUser!.Payments.OrderByDescending(p => p.CreatedAt).Select(payment => new UserPaymentResponse
         {
-            UserPlanId = userPlan.Id,
-            PlanName = userPlan.Plan.Name,
-            Amount = userPlan.Amount,
-            StartDate = userPlan.StartDate,
-            EndDate = userPlan.EndDate,
+            PaymentId = payment.Id,
+            PlanName = payment.Plan.Name,
+            IsDone = payment.IsDone,
+            Amount = payment.Amount,
+            StartDate = payment.StartDate,
+            EndDate = payment.EndDate,
         }).ToList();
     }
 }

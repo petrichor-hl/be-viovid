@@ -10,7 +10,7 @@ public class ApplicationUser : IdentityUser<Guid>
     public DateTime? RefreshTokenExpirationDateTime { get; set; }
     public string? FcmToken { get; set; }
     public UserProfile UserProfile { get; set; } = null!;
-    public ICollection<UserPlan> UserPlans { get; set; } = null!;
+    // public ICollection<UserPlan> UserPlans { get; set; } = null!;
     public ICollection<Payment> Payments { get; set; } = null!;
     public ICollection<MyFilm> MyFilms { get; set; } = null!;
     
