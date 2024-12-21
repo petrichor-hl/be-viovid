@@ -55,16 +55,9 @@ public class UserController : ControllerBase
         return Ok(ApiResult<bool>.Success(await _userService.UpdateTrackingProgressAsync(updateTrackingProgressRequest)));
     }
     
-    // Just ignore this endpoint
-    [HttpPost("user-payments")]
-    public async Task<IActionResult> AddUserPayment(AddUserPaymentRequest addUserPaymentRequest)
-    {
-        return Ok(ApiResult<bool>.Success(await _userService.AddUserPayment(addUserPaymentRequest)));
-    }
-    
     [HttpGet("user-payments")]
     public async Task<IActionResult> GetUserPayments()
     {
-        return Ok(ApiResult<List<UserPlanResponse>>.Success(await _userService.GetUserPayments()));
+        return Ok(ApiResult<List<UserPaymentResponse>>.Success(await _userService.GetUserPayments()));
     }
 }

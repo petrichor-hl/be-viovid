@@ -18,8 +18,5 @@ public interface IUserService
     
     Task<bool> UpdateTrackingProgressAsync(UpdateTrackingProgressRequest updateTrackingProgressRequest);
     
-    // Just ignore this method
-    Task<bool> AddUserPayment(AddUserPaymentRequest addUserPaymentRequest);
-    
-    Task<List<UserPlanResponse>> GetUserPayments();
+    Task<List<UserPaymentResponse>> GetUserPayments();
 }

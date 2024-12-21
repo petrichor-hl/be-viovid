@@ -117,7 +117,7 @@ public class VnPayService : IVnPayService
     
                 // Now you can use parsedPaymentId to query the database or further logic
                  payment = await _dbContext.Payments
-                     .Include(payment => payment.ApplicationUser)
+                     .Include(p => p.ApplicationUser)
                      .FirstOrDefaultAsync();
                 if (payment == null)
                 {
@@ -152,33 +152,35 @@ public class VnPayService : IVnPayService
                 return false;
             }
             
-            var newUserPlan = new UserPlan
-            {
-                ApplicationUserId = applicationUserId,
-                PlanId = planId,
-                Amount = plan.Price,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration))
-            };
-            
-            await _dbContext.UserPlans.AddAsync(newUserPlan);
-            await _dbContext.SaveChangesAsync();
-
-
-            if (payment.ApplicationUser.FcmToken == null) return true;
-            
-            var dataPayload = new Dictionary<string, string>
-            {
-                { "type", "Payment" },
-            };
-            
-            Console.WriteLine($"PushNotificationToIndividualDevice");
-            await _pushNotificationService.PushNotificationToIndividualDevice(
-                "Thanh toán thành công!", 
-                "Cảm ơn bạn đã sử dụng dịch vụ",
-                dataPayload,
-                payment.ApplicationUser.FcmToken
-            );
+            // var newUserPlan = new UserPlan
+            // {
+            //     ApplicationUserId = applicationUserId,
+            //     PlanId = planId,
+            //     Amount = plan.Price,
+            //     StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            //     EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(plan.Duration))
+            // };
+            //
+            // await _dbContext.UserPlans.AddAsync(newUserPlan);
+            // await _dbContext.SaveChangesAsync();
+            //
+            //
+            // if (payment.ApplicationUser.FcmToken == null)
+            // {
+            //     return true;
+            // }
+            //
+            // var dataPayload = new Dictionary<string, string>
+            // {
+            //     { "type", "Payment" },
+            // };
+            //
+            // await _pushNotificationService.PushNotificationToIndividualDevice(
+            //     "Thanh toán thành công!", 
+            //     "Cảm ơn bạn đã sử dụng dịch vụ",
+            //     dataPayload,
+            //     payment.ApplicationUser.FcmToken
+            // );
 
             return true;
         }

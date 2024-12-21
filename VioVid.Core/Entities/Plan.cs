@@ -8,5 +8,5 @@ public class Plan
     public int Duration { get; set; }
     public int Order { get; set; }
     
-    public ICollection<UserPlan> UserPlans { get; set; } = null!;
+    // public ICollection<UserPlan> UserPlans { get; set; } = null!;
 }
