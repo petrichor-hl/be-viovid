@@ -115,8 +115,6 @@ public class VnPayService : IVnPayService
         // Try to parse the value from vnpParams["vnp_TxnRef"] into a Guid
         if (Guid.TryParse(vnpParams["vnp_TxnRef"], out var parsedPaymentId))
         {
-            Console.WriteLine($"Payment Id successfully parsed: {parsedPaymentId}");
-
             // Now you can use parsedPaymentId to query the database or further logic
             payment = await _dbContext.Payments
                 .Include(p => p.ApplicationUser)
@@ -133,12 +131,10 @@ public class VnPayService : IVnPayService
             {
                 return true;
             }
-            Console.WriteLine($"Payment: {payment}");
         }
         else
         {
-            Console.WriteLine("Invalid PaymentId format.");
-            return false;
+            throw new InvalidModelException("PaymentId không hợp lệ");
         }
 
         var isSuccess = responseCode == "00";

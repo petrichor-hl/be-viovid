@@ -47,38 +47,32 @@ public class PaymentController : ControllerBase
         return Ok(ApiResult<bool>.Success(await _vnPayService.VerifyPayment(vnpParams)));
     }
 
-    // [HttpPost("stripe")]
-    // public async Task<IActionResult> CreateStripePaymentUrl(CreatePaymentRequest createPaymentRequest)
-    // {
-    //     //Create payment
-    //     var payment = await _paymentService.CreatePayment(createPaymentRequest);
-    //     Console.WriteLine(payment);
-    //
-    //     // Access HttpContext directly
-    //     var context = HttpContext;
-    //
-    //     // Generate the payment URL via the VnPayService
-    //     var paymentUrl = await _stripeService.CreatePaymentSession(payment);
-    //
-    //     // Return the result wrapped in ApiResult
-    //     return Ok(ApiResult<string>.Success(paymentUrl));
-    // }
-    //
-    // [HttpGet("stripe-callback-success")]
-    // [AllowAnonymous]
-    // public async Task<IActionResult> StripeCallbackSuccess([FromQuery] string session_id)
-    // {
-    //     var isSuccess = await _stripeService.Success(session_id);
-    //     if (isSuccess) return Ok(ApiResult<string>.Success("Payment was successful!"));
-    //     return BadRequest(ApiResult<string>.Success("Payment failed!"));
-    // }
-    //
-    // [HttpGet("stripe-callback-cancelled")]
-    // [AllowAnonymous]
-    // public async Task<IActionResult> StripeCallbackCancelled([FromQuery] string session_id)
-    // {
-    //     return BadRequest(ApiResult<string>.Success("Payment was cancelled!"));
-    // }
+    [HttpPost("stripe")]
+    public async Task<IActionResult> CreateStripePaymentUrl(CreatePaymentRequest createPaymentRequest)
+    {
+        //Create payment
+        var payment = await _paymentService.CreatePayment(createPaymentRequest);
+    
+        // Generate the payment URL via the VnPayService
+        var paymentUrl = await _stripeService.CreatePaymentSession(payment);
+    
+        // Return the result wrapped in ApiResult
+        return Ok(ApiResult<string>.Success(paymentUrl));
+    }
+    
+    [HttpPost("stripe-callback-success")]
+    [AllowAnonymous]
+    public async Task<IActionResult> StripeCallbackSuccess(StripeCallbackRequest stripeCallbackRequest)
+    {
+        return Ok(ApiResult<bool>.Success(await _stripeService.HandleRecord(stripeCallbackRequest)));
+    }
+    
+    [HttpPost("stripe-callback-cancelled")]
+    [AllowAnonymous]
+    public async Task StripeCallbackCancelled(StripeCallbackRequest stripeCallbackRequest)
+    {
+        await _stripeService.ExpireSession(stripeCallbackRequest);
+    }
 
     [HttpPost("momo")]
     public async Task<IActionResult> CreateMomoPaymentUrl(CreatePaymentRequest createPaymentRequest)

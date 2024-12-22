@@ -16,13 +16,17 @@ namespace VioVid.WebAPI.Services;
 public class MomoService : IMomoService
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly HttpClient _httpClient = new HttpClient();
     private readonly IPaymentService _paymentService;
+    private readonly IConfiguration _configuration;
     
-    public MomoService(ApplicationDbContext dbContext, IPaymentService paymentService)
+    private readonly HttpClient _httpClient = new HttpClient();
+
+    
+    public MomoService(ApplicationDbContext dbContext, IPaymentService paymentService, IConfiguration configuration)
     {
         _dbContext = dbContext;
         _paymentService = paymentService;
+        _configuration = configuration;
     }
     
     public async Task<string> CreatePaymentUrl(Payment payment)
@@ -34,22 +38,21 @@ public class MomoService : IMomoService
             throw new NotFoundException($"Không tìm thấy Plan {payment.PlanId}");
         }
         
-        // Đường dẫn API
-        const string url = "https://test-payment.momo.vn/v2/gateway/api/create";
+        var url = _configuration["Momo:BaseUrl"];
         
-        const string accessKey = "F8BBA842ECF85";
-        const string secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
+        var accessKey = _configuration["Momo:AccessKey"];
+        var secretKey = _configuration["Momo:SecretKey"];
         
         // Data for rawSignature
         var amount = plan.Price;
-        const string extraData = "";
-        const string ipnUrl = "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
+        var extraData = _configuration["Momo:ExtraData"];
+        var ipnUrl = _configuration["Momo:IpnUrl"];
         var orderId = payment.Id;
         var orderInfo = plan.Name;
-        const string partnerCode = "MOMO";
-        const string redirectUrl = "http://192.168.1.8:5416/momo-result";
+        var partnerCode = _configuration["Momo:PartnerCode"];
+        var redirectUrl = _configuration["Momo:RedirectUrl"];
         var requestId = Guid.NewGuid().ToString();
-        const string requestType = "payWithMethod";
+        var requestType = _configuration["Momo:RequestType"];
         
         var rawSignature = "accessKey="+accessKey
                                    +"&amount="+amount
@@ -66,7 +69,7 @@ public class MomoService : IMomoService
         var payload = new
         {
             partnerCode,
-            storeId = "VioVid",
+            storeId = _configuration["Momo:StoreId"],
             requestId,
             amount = plan.Price,
             orderId = payment.Id,
@@ -75,10 +78,8 @@ public class MomoService : IMomoService
             ipnUrl,
             requestType,
             extraData,
-            lang = "vi",
+            lang = _configuration["Momo:Lang"],
             signature = GetSignature(rawSignature, secretKey),
-            // Bổ sung
-            orderExpireTime = 30,
         };
         
         // Chuyển payload thành JSON
@@ -95,7 +96,7 @@ public class MomoService : IMomoService
             var responseContent = await response.Content.ReadAsStringAsync();
             var momoResponse = JsonSerializer.Deserialize<MomoResponse>(responseContent);
             Console.WriteLine(responseContent);
-            return momoResponse.PayUrl;
+            return momoResponse!.PayUrl;
         }
         
         Console.WriteLine(response.StatusCode);
