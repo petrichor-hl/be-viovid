@@ -13,12 +13,13 @@ public class PostCommentService : IPostCommentService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IPushNotificationService _pushNotificationService;
 
-
-    public PostCommentService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+    public PostCommentService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor, IPushNotificationService pushNotificationService)
     {
         _dbContext = dbContext;
         _httpContextAccessor = httpContextAccessor;
+        _pushNotificationService = pushNotificationService;
     }
 
     public async Task<PostComment> GetByIdAsync(Guid id)
@@ -35,34 +36,56 @@ public class PostCommentService : IPostCommentService
         {
             var user = _httpContextAccessor.HttpContext?.User!;
             var userIdClaim = user.FindFirst("UserId");
-            var applicationUserId = Guid.Parse(userIdClaim!.Value);
-
-            var applicationUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id.Equals(applicationUserId));
+            var applicationUserId = Guid.Parse(userIdClaim!.Value); // => applicationUserId của người comment
+            
+            var commentOwner = await _dbContext.Users
+                .Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Id == applicationUserId);
 
             // Create the new PostComment
             var postComment = new PostComment
             {
                 Content = createPostCommentRequest.Content,
-                ApplicationUserId = applicationUserId,
+                ApplicationUserId = commentOwner!.Id,
                 PostId = createPostCommentRequest.PostId,
                 CreatedAt = DateTime.UtcNow,
-                ApplicationUser = applicationUser!
             };
 
             // Add the PostComment to the Post's PostComments collection
-            var post = await _dbContext.Posts.Include(p => p.PostComments) // Ensure PostComments is loaded
+            var post = await _dbContext.Posts
+                .Include(p => p.ApplicationUser)
+                .Include(p => p.PostComments)
                 .FirstOrDefaultAsync(p => p.Id == createPostCommentRequest.PostId);
 
-            if (post == null) throw new Exception("Post not found");
+            if (post == null)
+            {
+                throw new NotFoundException($"Không tìm thấy Post {createPostCommentRequest.PostId}");
+            }
 
             // Add the comment to the Post's collection
             post.PostComments.Add(postComment);
-
-            foreach (var comment in post.PostComments)
-                Console.WriteLine($"Comment ID: {comment.Id}, Content: {comment.Content}");
-
-            // Save changes to the database
             await _dbContext.SaveChangesAsync();
+            
+            // Push Noti to Post Owner
+            // Nếu Post Owner có FCM và Post Owner != Comment Owner
+            if (post.ApplicationUser.FcmToken != null && post.ApplicationUser.Id != commentOwner.Id)
+            {
+                var dataPayload = new Dictionary<string, string>
+                {
+                    { "type", "NewCommentOnYourPost" },
+                    { "id", post.Id.ToString() },
+                    // { "commentOwnerName", commentOwner.UserProfile.Name },
+                    // { "commentOwnerAvatar", commentOwner.UserProfile.Avatar },
+                    // { "content", createPostCommentRequest.Content },
+                };
+
+                await _pushNotificationService.PushNotificationToIndividualDevice(
+                    $"{commentOwner.UserProfile.Name} vừa bình luận bài viết của bạn",
+                    createPostCommentRequest.Content,
+                    dataPayload,
+                    post.ApplicationUser.FcmToken
+                );
+            }
 
             return postComment;
         }
@@ -107,7 +130,9 @@ public class PostCommentService : IPostCommentService
         var pageSize = getPagingPostCommentRequest.PageSize;
         var postId = getPagingPostCommentRequest.PostId;
 
-        var query = _dbContext.PostComments.AsQueryable();
+        var query = _dbContext.PostComments
+            .Include(comment =>comment.ApplicationUser)
+            .AsQueryable();
 
         if (postId != null)
             query = query.Where(p => p.PostId.Equals(postId)).OrderByDescending(p => p.CreatedAt);

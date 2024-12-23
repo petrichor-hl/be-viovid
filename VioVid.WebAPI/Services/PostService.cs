@@ -72,6 +72,7 @@ public class PostService : IPostService
 
         // Lấy ra trang trong request cần
         var posts = await query
+            .Include(post => post.ApplicationUser)
             .Include(p => p.PostComments)
             .Skip(pageIndex * pageSize)
             .Take(pageSize)

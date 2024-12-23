@@ -170,13 +170,18 @@ public class FilmService : IFilmService
             throw new NotFoundException($"Không tìm thấy Film có id {filmId}");
         }
         
+        var applicationUser = await _dbContext.Users
+            .Include(u => u.UserProfile)
+            .FirstAsync(u => u.Id == applicationUserId);
+        
         var review = new Review
         {
             Start = postReviewRequest.Start,
             Content = postReviewRequest.Content,
             CreateAt = DateTime.UtcNow,
             FilmId = filmId,
-            ApplicationUserId = applicationUserId
+            ApplicationUserId = applicationUserId,
+            ApplicationUser = applicationUser,
         };
         
         await _dbContext.Reviews.AddAsync(review);
@@ -185,6 +190,8 @@ public class FilmService : IFilmService
         return new ReviewResponse
         {
             Id = review.Id,
+            UserName = review.ApplicationUser.UserProfile.Name,
+            UserAvatar = review.ApplicationUser.UserProfile.Avatar,
             Start = review.Start,
             Content = review.Content,
             CreateAt = review.CreateAt,
