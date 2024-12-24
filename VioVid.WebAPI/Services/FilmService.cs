@@ -1,3 +1,4 @@
+using System.Globalization;
 using Application.DTOs.Film.Req;
 using Application.DTOs.Film.Res;
 using Application.Exceptions;
@@ -291,7 +292,9 @@ public class FilmService : IFilmService
 
         var newNoti = new UserNotification
         {
-            Category = NotificationCategory.Film,
+            Id = Guid.NewGuid(),
+            ApplicationUserId = null,
+            Category = NotificationCategory.NewFilm,
             CreatedDateTime = DateTime.UtcNow,
             ReadStatus = NotificationReadStatus.UnRead,
             Title = "Phim mới vừa được thêm!",
@@ -308,8 +311,15 @@ public class FilmService : IFilmService
 
         var dataPayload = new Dictionary<string, string>
         {
-            { "type", "NewFilm" },
+            { "userNotificationId", newNoti.Id.ToString() },
+            { "category", ((int)NotificationCategory.NewFilm).ToString() },
+            { "createdDateTime", DateTime.UtcNow.ToString() },
+            // newNoti.params
             { "filmId", newFilm.Id.ToString() },
+            { "name", newFilm.Name },
+            { "overview", newFilm.Overview },
+            { "backdropPath", newFilm.BackdropPath },
+            { "contentRating", newFilm.ContentRating },
         };
         
         // Lưu Film trước khi Push notification

@@ -2,8 +2,9 @@ namespace VioVid.Core.Enum;
 
 public enum NotificationCategory
 {
-    Film,
-    Post,
+    NewFilm = 0,
+    NewCommentOnYourPost = 1,
+    Payment = 2,
 }
 
 public enum NotificationReadStatus

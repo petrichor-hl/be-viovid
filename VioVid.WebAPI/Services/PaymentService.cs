@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Application.DTOs.Payment;
 using VioVid.Core.Entities;
+using VioVid.Core.Enum;
 using VioVid.Infrastructure.DatabaseContext;
 using VioVid.WebAPI.ServiceContracts;
 
@@ -59,7 +60,7 @@ public class PaymentService : IPaymentService
         
         var dataPayload = new Dictionary<string, string>
         {
-            { "type", "Payment" },
+            { "category", ((int)NotificationCategory.Payment).ToString() },
         };
         
         if (isSuccess)

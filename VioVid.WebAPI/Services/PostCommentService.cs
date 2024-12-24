@@ -4,6 +4,7 @@ using Application.Models;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Common;
 using VioVid.Core.Entities;
+using VioVid.Core.Enum;
 using VioVid.Infrastructure.DatabaseContext;
 using VioVid.WebAPI.ServiceContracts;
 
@@ -64,6 +65,26 @@ public class PostCommentService : IPostCommentService
 
             // Add the comment to the Post's collection
             post.PostComments.Add(postComment);
+            
+            var newNoti = new UserNotification
+            {
+                Id = Guid.NewGuid(),
+                ApplicationUserId = post.ApplicationUserId,
+                Category = NotificationCategory.NewCommentOnYourPost,
+                CreatedDateTime = DateTime.UtcNow,
+                ReadStatus = NotificationReadStatus.UnRead,
+                Title = $"{commentOwner.UserProfile.Name} vừa bình luận bài viết của bạn",
+                Body = createPostCommentRequest.Content,
+                Params = new Dictionary<string, object>
+                {
+                    { "postId", post.Id },
+                    { "commentOwnerName", commentOwner.UserProfile.Name },
+                    { "commentOwnerAvatar", commentOwner.UserProfile.Avatar },
+                    { "content", createPostCommentRequest.Content },
+                }
+            };
+            
+            await _dbContext.UserNotifications.AddAsync(newNoti);
             await _dbContext.SaveChangesAsync();
             
             // Push Noti to Post Owner
@@ -72,11 +93,14 @@ public class PostCommentService : IPostCommentService
             {
                 var dataPayload = new Dictionary<string, string>
                 {
-                    { "type", "NewCommentOnYourPost" },
-                    { "id", post.Id.ToString() },
-                    // { "commentOwnerName", commentOwner.UserProfile.Name },
-                    // { "commentOwnerAvatar", commentOwner.UserProfile.Avatar },
-                    // { "content", createPostCommentRequest.Content },
+                    { "userNotificationId", newNoti.Id.ToString() },
+                    { "category", ((int)NotificationCategory.NewCommentOnYourPost).ToString() },
+                    { "createdDateTime", DateTime.UtcNow.ToString() },
+                    // newNoti.params
+                    { "postId", post.Id.ToString() },
+                    { "commentOwnerName", commentOwner.UserProfile.Name },
+                    { "commentOwnerAvatar", commentOwner.UserProfile.Avatar },
+                    { "content", createPostCommentRequest.Content },
                 };
 
                 await _pushNotificationService.PushNotificationToIndividualDevice(
