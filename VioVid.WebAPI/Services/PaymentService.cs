@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
 using Application.DTOs.Payment;
+using Application.Exceptions;
 using VioVid.Core.Entities;
 using VioVid.Core.Enum;
 using VioVid.Infrastructure.DatabaseContext;
@@ -27,10 +28,18 @@ public class PaymentService : IPaymentService
         var userId = user.FindFirstValue("UserId");
         var applicationUserId = Guid.Parse(userId);
         
+        var plan = await _dbContext.Plans.FindAsync(createPaymentRequest.PlanId);
+
+        if (plan == null)
+        {
+            throw new NotFoundException($"Plan {createPaymentRequest.PlanId} không tồn tại");
+        }
+        
         var newPayment = new Payment
         {
             ApplicationUserId = applicationUserId,
             PlanId = createPaymentRequest.PlanId,
+            PlanName = plan.Name,
             CreatedAt = DateTime.UtcNow,
             IsDone = false
         };

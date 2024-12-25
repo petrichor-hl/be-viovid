@@ -18,7 +18,7 @@ public class PlanService : IPlanService
     
     public async Task<List<Plan>> GetAllAsync()
     {
-        return await _dbContext.Plans.OrderBy(p => p.Order).ToListAsync();
+        return await _dbContext.Plans.OrderBy(p => p.Price).ToListAsync();
     }
 
     public async Task<Plan> GetByIdAsync(Guid id)
@@ -34,18 +34,18 @@ public class PlanService : IPlanService
     public async Task<Plan> CreatePlanAsync(CreatePlanRequest createPlanRequest)
     {
         // Kiểm tra bảng có dữ liệu hay không
-        int maxOrder = -1;
-        if (await _dbContext.Plans.AnyAsync())
-        {
-            maxOrder = await _dbContext.Plans.MaxAsync(p => p.Order);
-        }
+        // int maxOrder = -1;
+        // if (await _dbContext.Plans.AnyAsync())
+        // {
+        //     maxOrder = await _dbContext.Plans.MaxAsync(p => p.Order);
+        // }
         
         var newPlan = new Plan()
         {
             Name = createPlanRequest.Name,
             Price = createPlanRequest.Price,
             Duration = createPlanRequest.Duration,
-            Order = maxOrder + 1,
+            // Order = maxOrder + 1,
         };
         
         await _dbContext.Plans.AddAsync(newPlan);
@@ -64,7 +64,7 @@ public class PlanService : IPlanService
         plan.Name = updateGenreRequest.Name;
         plan.Price = updateGenreRequest.Price;
         plan.Duration = updateGenreRequest.Duration;
-        plan.Order = updateGenreRequest.Order;
+        // plan.Order = updateGenreRequest.Order;
         
         await _dbContext.SaveChangesAsync();
         return plan;

@@ -59,6 +59,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
                     v => JsonSerializer.Deserialize<Dictionary<string, object>>(v, (JsonSerializerOptions)null));
         });
+        
+        builder.Entity<Payment>()
+            .HasOne(p => p.Plan)
+            .WithMany(p => p.Payments)
+            .HasForeignKey(p => p.PlanId)
+            .OnDelete(DeleteBehavior.SetNull); // Khi Plan bị xoá thì Payment.PlanId = null
     }
 
 }

@@ -59,7 +59,7 @@ public class UserService : IUserService
             return response;
         }
         
-        response.PlanName = latestUserPayment.Plan.Name;
+        response.PlanName = latestUserPayment.PlanName;
         response.StartDate = latestUserPayment.StartDate;
         response.EndDate = latestUserPayment.EndDate;
         
@@ -194,13 +194,12 @@ public class UserService : IUserService
         
         var applicationUser = await _dbContext.Users
             .Include(u => u.Payments)
-                .ThenInclude(userPlan => userPlan.Plan)
             .FirstOrDefaultAsync(u => u.Id == applicationUserId);
 
         return applicationUser!.Payments.OrderByDescending(p => p.CreatedAt).Select(payment => new UserPaymentResponse
         {
             PaymentId = payment.Id,
-            PlanName = payment.Plan.Name,
+            PlanName = payment.PlanName,
             IsDone = payment.IsDone,
             Amount = payment.Amount,
             StartDate = payment.StartDate,

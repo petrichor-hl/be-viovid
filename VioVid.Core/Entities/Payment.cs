@@ -10,11 +10,12 @@ public class Payment
     
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
+    public string PlanName { get; set; } = null!;
     public int? Amount { get; set; }
     
     public Guid ApplicationUserId { get; set; }
     public ApplicationUser ApplicationUser { get; set; } = null!;
     
-    public Guid PlanId { get; set; }
-    public Plan Plan { get; set; } = null!;
+    public Guid? PlanId { get; set; }
+    public Plan? Plan { get; set; } = null!;
 }

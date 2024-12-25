@@ -13,6 +13,6 @@ public class UpdatePlanRequest
     [Required]
     public int Duration { get; set; }
     
-    [Required]
-    public int Order { get; set; }
+    // [Required]
+    // public int Order { get; set; }
 }

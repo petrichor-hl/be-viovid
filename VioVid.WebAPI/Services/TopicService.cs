@@ -55,94 +55,94 @@ public class TopicService : ITopicService
         return newTopic;
     }
 
-    public async Task<TopicResponse> AddFilmsToTopicAsync(Guid topicId, AddFilmsToTopicRequest addFilmsToTopicRequest)
-    {
-        var topic = await _dbContext.Topics
-            .Include(topic => topic.TopicFilms)
-            .ThenInclude(topicFilm => topicFilm.Film)
-            .FirstOrDefaultAsync(topic => topic.Id == topicId);
-        if (topic == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Topic có id {topicId}");
-        }
-        
-        foreach (var filmId in addFilmsToTopicRequest.FilmIds)
-        {
-            var film = await _dbContext.Films.FindAsync(filmId);
-            if (film == null)
-            {
-                throw new NotFoundException($"Không tìm thấy Film {filmId}");
-            }
-            
-            if (topic.TopicFilms.Any(topicFilm => topicFilm.FilmId == filmId))
-            {
-                throw new DuplicateException($"Topic {topicId} đã chứa Film {filmId} rồi");
-            }
-            
-            topic.TopicFilms.Add(new TopicFilm
-            {
-                Film = film
-            });
-        }
+    // public async Task<TopicResponse> AddFilmsToTopicAsync(Guid topicId, AddFilmsToTopicRequest addFilmsToTopicRequest)
+    // {
+    //     var topic = await _dbContext.Topics
+    //         .Include(topic => topic.TopicFilms)
+    //         .ThenInclude(topicFilm => topicFilm.Film)
+    //         .FirstOrDefaultAsync(topic => topic.Id == topicId);
+    //     if (topic == null)
+    //     {
+    //         throw new NotFoundException($"Không tìm thấy Topic có id {topicId}");
+    //     }
+    //     
+    //     foreach (var filmId in addFilmsToTopicRequest.FilmIds)
+    //     {
+    //         var film = await _dbContext.Films.FindAsync(filmId);
+    //         if (film == null)
+    //         {
+    //             throw new NotFoundException($"Không tìm thấy Film {filmId}");
+    //         }
+    //         
+    //         if (topic.TopicFilms.Any(topicFilm => topicFilm.FilmId == filmId))
+    //         {
+    //             throw new DuplicateException($"Topic {topicId} đã chứa Film {filmId} rồi");
+    //         }
+    //         
+    //         topic.TopicFilms.Add(new TopicFilm
+    //         {
+    //             Film = film
+    //         });
+    //     }
+    //
+    //     _dbContext.Topics.Update(topic);
+    //     await _dbContext.SaveChangesAsync();
+    //
+    //     return new TopicResponse
+    //     {
+    //         TopicId = topic.Id,
+    //         Name = topic.Name,
+    //         Order = topic.Order,
+    //         Films = topic.TopicFilms.Select(topicFilm => new SimpleFilmResponse
+    //         {
+    //             FilmId = topicFilm.FilmId,
+    //             Name = topicFilm.Film.Name,
+    //             PosterPath = topicFilm.Film.PosterPath,
+    //         }).ToList()
+    //     };
+    // }
 
-        _dbContext.Topics.Update(topic);
-        await _dbContext.SaveChangesAsync();
-
-        return new TopicResponse
-        {
-            TopicId = topic.Id,
-            Name = topic.Name,
-            Order = topic.Order,
-            Films = topic.TopicFilms.Select(topicFilm => new SimpleFilmResponse
-            {
-                FilmId = topicFilm.FilmId,
-                Name = topicFilm.Film.Name,
-                PosterPath = topicFilm.Film.PosterPath,
-            }).ToList()
-        };
-    }
-
-    public async Task<TopicResponse> RemoveFilmsFromTopicAsync(Guid topicId, RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest)
-    {
-        var topic = await _dbContext.Topics
-            .Include(topic => topic.TopicFilms)
-            .ThenInclude(topicFilm => topicFilm.Film)
-            .FirstOrDefaultAsync(topic => topic.Id == topicId);
-        if (topic == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Topic có id {topicId}");
-        }
-        
-        foreach (var filmId in removeFilmsFromTopicRequest.FilmIds)
-        {
-            var topicFilm =
-                topic.TopicFilms.FirstOrDefault(topicFilm =>
-                    topicFilm.TopicId == topicId && topicFilm.FilmId == filmId);
-            
-            if (topicFilm == null)
-            {
-                throw new NotFoundException($"Topic {topicId} không tồn tại Film {filmId}");
-            } 
-            
-            topic.TopicFilms.Remove(topicFilm);
-        }
-
-        _dbContext.Topics.Update(topic);
-        await _dbContext.SaveChangesAsync();
-
-        return new TopicResponse
-        {
-            TopicId = topic.Id,
-            Name = topic.Name,
-            Order = topic.Order,
-            Films = topic.TopicFilms.Select(topicFilm => new SimpleFilmResponse
-            {
-                FilmId = topicFilm.FilmId,
-                Name = topicFilm.Film.Name,
-                PosterPath = topicFilm.Film.PosterPath,
-            }).ToList()
-        };
-    }
+    // public async Task<TopicResponse> RemoveFilmsFromTopicAsync(Guid topicId, RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest)
+    // {
+    //     var topic = await _dbContext.Topics
+    //         .Include(topic => topic.TopicFilms)
+    //         .ThenInclude(topicFilm => topicFilm.Film)
+    //         .FirstOrDefaultAsync(topic => topic.Id == topicId);
+    //     if (topic == null)
+    //     {
+    //         throw new NotFoundException($"Không tìm thấy Topic có id {topicId}");
+    //     }
+    //     
+    //     foreach (var filmId in removeFilmsFromTopicRequest.FilmIds)
+    //     {
+    //         var topicFilm =
+    //             topic.TopicFilms.FirstOrDefault(topicFilm =>
+    //                 topicFilm.TopicId == topicId && topicFilm.FilmId == filmId);
+    //         
+    //         if (topicFilm == null)
+    //         {
+    //             throw new NotFoundException($"Topic {topicId} không tồn tại Film {filmId}");
+    //         } 
+    //         
+    //         topic.TopicFilms.Remove(topicFilm);
+    //     }
+    //
+    //     _dbContext.Topics.Update(topic);
+    //     await _dbContext.SaveChangesAsync();
+    //
+    //     return new TopicResponse
+    //     {
+    //         TopicId = topic.Id,
+    //         Name = topic.Name,
+    //         Order = topic.Order,
+    //         Films = topic.TopicFilms.Select(topicFilm => new SimpleFilmResponse
+    //         {
+    //             FilmId = topicFilm.FilmId,
+    //             Name = topicFilm.Film.Name,
+    //             PosterPath = topicFilm.Film.PosterPath,
+    //         }).ToList()
+    //     };
+    // }
     
     public async Task<Topic> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest)
     {
@@ -157,6 +157,44 @@ public class TopicService : ITopicService
         await _dbContext.SaveChangesAsync();
 
         return topic;
+    }
+
+    public async Task<bool> UpdateListFilm(Guid topicId, UpdateListFilmRequest updateListFilmRequest)
+    {
+        var topic = await _dbContext.Topics
+            .Include(topic => topic.TopicFilms)
+            .ThenInclude(topicFilm => topicFilm.Film)
+            .FirstOrDefaultAsync(topic => topic.Id == topicId);
+        
+        if (topic == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Topic có id {topicId}");
+        }
+        
+        topic.TopicFilms.Clear();
+        foreach (var filmId in updateListFilmRequest.FilmIds)
+        {
+            topic.TopicFilms.Add(new TopicFilm
+            {
+                FilmId = filmId,
+            });
+        }
+        
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+        // return new TopicResponse
+        // {
+        //     TopicId = topic.Id,
+        //     Name = topic.Name,
+        //     Order = topic.Order,
+        //     Films = topic.TopicFilms.Select(topicFilm => new SimpleFilmResponse
+        //     {
+        //         FilmId = topicFilm.FilmId,
+        //         Name = topicFilm.Film.Name,
+        //         PosterPath = topicFilm.Film.PosterPath,
+        //     }).ToList()
+        // };
     }
 
     public async Task<Guid> DeleteTopicAsync(Guid id)

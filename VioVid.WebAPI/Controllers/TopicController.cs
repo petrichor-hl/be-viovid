@@ -30,22 +30,28 @@ public class TopicController : ControllerBase
         return Ok(ApiResult<Topic>.Success(await _topicService.CreateTopicAsync(createTopicRequest)));
     }
     
-    [HttpPost("{topicId:guid}/add-films")]
-    public async Task<IActionResult> AddFilmsToTopic(Guid topicId, [FromBody] AddFilmsToTopicRequest addFilmsToTopicRequest)
-    {
-        return Ok(ApiResult<TopicResponse>.Success(await _topicService.AddFilmsToTopicAsync(topicId, addFilmsToTopicRequest)));
-    }
+    // [HttpPost("{topicId:guid}/add-films")]
+    // public async Task<IActionResult> AddFilmsToTopic(Guid topicId, [FromBody] AddFilmsToTopicRequest addFilmsToTopicRequest)
+    // {
+    //     return Ok(ApiResult<TopicResponse>.Success(await _topicService.AddFilmsToTopicAsync(topicId, addFilmsToTopicRequest)));
+    // }
     
-    [HttpPost("{topicId:guid}/remove-films")]
-    public async Task<IActionResult> RemoveFilmsFromTopic(Guid topicId, [FromBody] RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest)
-    {
-        return Ok(ApiResult<TopicResponse>.Success(await _topicService.RemoveFilmsFromTopicAsync(topicId, removeFilmsFromTopicRequest)));
-    }
+    // [HttpPost("{topicId:guid}/remove-films")]
+    // public async Task<IActionResult> RemoveFilmsFromTopic(Guid topicId, [FromBody] RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest)
+    // {
+    //     return Ok(ApiResult<TopicResponse>.Success(await _topicService.RemoveFilmsFromTopicAsync(topicId, removeFilmsFromTopicRequest)));
+    // }
     
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateTopic(Guid id, [FromBody] UpdateTopicRequest updateTopicRequest)
     {
         return Ok(ApiResult<Topic>.Success(await _topicService.UpdateTopicAsync(id, updateTopicRequest)));
+    }
+    
+    [HttpPut("{id:guid}/update-list-film")]
+    public async Task<IActionResult> UpdateListFilm(Guid id, [FromBody] UpdateListFilmRequest updateListFilmRequest)
+    {
+        return Ok(ApiResult<bool>.Success(await _topicService.UpdateListFilm(id, updateListFilmRequest)));
     }
     
     [HttpDelete("{id:guid}")]
