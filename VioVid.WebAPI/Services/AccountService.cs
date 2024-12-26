@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using VioVid.Core.Entities;
 using VioVid.Core.Identity;
 using VioVid.Core.ServiceContracts;
+using VioVid.Infrastructure;
 using VioVid.WebAPI.ServiceContracts;
 
 namespace VioVid.WebAPI.Services;
@@ -67,8 +68,13 @@ public class AccountService : IAccountService
             var verifyEmailTokenEncoded = HttpUtility.UrlEncode(verifyEmailToken);
             Console.WriteLine("verifyEmailToken = " + verifyEmailToken);
 
-            var confirmLink = $"{_configuration["VioVidDomain"]}/#/confirm-email?email={registerRequest.Email}&verifyEmailToken={verifyEmailTokenEncoded}";
-            // await _emailSender.SendMailAsync(registerDTO.Email, "[VioVid] Please confirm your email address", EmailTemplate.ConfirmEmail(registerDTO.Name, redirectTo: confirmLink));
+            var confirmLink = $"{_configuration["VioVidDomain"]}/confirm-email?email={registerRequest.Email}&verifyEmailToken={verifyEmailTokenEncoded}";
+            Console.WriteLine("confirmLink = " + confirmLink);
+            await _emailSender.SendMailAsync(
+                registerRequest.Email, 
+                "[VioVid] Please confirm your email address", 
+                EmailTemplate.ConfirmEmail(registerRequest.Name, redirectTo: confirmLink)
+            );
             
             return user.Id;
         }
