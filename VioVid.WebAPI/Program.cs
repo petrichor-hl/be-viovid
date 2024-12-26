@@ -59,6 +59,7 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddScoped<ITopicService, TopicService>()
     .AddScoped<IFilmService, FilmService>()
     .AddScoped<IUserService, UserService>()
+    .AddScoped<ISupabaseService, SupabaseService>()
     .AddScoped<IPostService, PostService>()
     .AddScoped<IPostCommentService, PostCommentService>()
     .AddScoped<IChannelService, ChannelService>()
@@ -127,12 +128,15 @@ builder.Services.AddAuthentication(options =>
             OnTokenValidated = async context =>
             {
                 var userIdClaim = context.Principal.FindFirstValue("UserId");
+                Console.WriteLine($"UserId: {userIdClaim}");
                 if (userIdClaim == null) context.Fail("Token không chứa thuộc tính UserId.");
-
+                else
+                    Console.WriteLine($"Success, : {userIdClaim}");
                 var userManager =
                     context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
-
+                Console.WriteLine($"userManager: {userManager}");
                 var user = await userManager.FindByIdAsync(userIdClaim);
+                Console.WriteLine($"user: {user}");
                 var tokenVersionClaim = context.Principal.FindFirstValue("tokenVersion");
 
                 if (user == null)

@@ -41,7 +41,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatePost(CreatePostRequest createPostRequest)
+    public async Task<IActionResult> CreatePost([FromForm] CreatePostRequest createPostRequest)
     {
         return Ok(ApiResult<Post>.Success(await _postService.CreatePostAsync(createPostRequest)));
     }
