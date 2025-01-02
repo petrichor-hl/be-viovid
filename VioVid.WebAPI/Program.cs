@@ -23,7 +23,7 @@ using VioVid.WebAPI.Services;
 
 FirebaseApp.Create(new AppOptions
 {
-    Credential = GoogleCredential.FromFile("viovid-fe752-firebase-adminsdk-8fx32-e3f47e5ea5.json")
+    Credential = GoogleCredential.FromFile("viovid-e5899-firebase-adminsdk-97e76-ef3d3b9af9.json")
 });
 
 var builder = WebApplication.CreateBuilder(args);
