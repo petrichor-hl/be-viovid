@@ -13,6 +13,8 @@ public class Payment
     public string PlanName { get; set; } = null!;
     public int? Amount { get; set; }
     
+    public string MethodName { get; set; } = null!;
+    
     public Guid ApplicationUserId { get; set; }
     public ApplicationUser ApplicationUser { get; set; } = null!;
     

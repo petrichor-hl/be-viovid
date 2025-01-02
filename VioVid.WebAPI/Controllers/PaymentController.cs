@@ -27,7 +27,7 @@ public class PaymentController : ControllerBase
     public async Task<IActionResult> CreateVnPayPaymentUrl(CreatePaymentRequest createPaymentRequest)
     {
         //Create payment
-        var payment = await _paymentService.CreatePayment(createPaymentRequest);
+        var payment = await _paymentService.CreatePayment(createPaymentRequest, "VNPAY");
 
         // Access HttpContext directly
         var context = HttpContext;
@@ -51,7 +51,7 @@ public class PaymentController : ControllerBase
     public async Task<IActionResult> CreateStripePaymentUrl(CreatePaymentRequest createPaymentRequest)
     {
         //Create payment
-        var payment = await _paymentService.CreatePayment(createPaymentRequest);
+        var payment = await _paymentService.CreatePayment(createPaymentRequest, "STRIPE");
     
         // Generate the payment URL via the VnPayService
         var paymentUrl = await _stripeService.CreatePaymentSession(payment);
@@ -77,7 +77,7 @@ public class PaymentController : ControllerBase
     [HttpPost("momo")]
     public async Task<IActionResult> CreateMomoPaymentUrl(CreatePaymentRequest createPaymentRequest)
     {
-        var payment = await _paymentService.CreatePayment(createPaymentRequest);
+        var payment = await _paymentService.CreatePayment(createPaymentRequest, "MOMO");
         
         var paymentUrl = await _momoService.CreatePaymentUrl(payment);
 

@@ -30,9 +30,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(options =>
     {
-        //Authorization policy
-        var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-        options.Filters.Add(new AuthorizeFilter(policy));
+        // Authorization policy
+        // var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+        // options.Filters.Add(new AuthorizeFilter(policy));
         // Model Validation
         options.Filters.Add<ModelValidation>();
     })

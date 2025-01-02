@@ -22,7 +22,7 @@ public class PaymentService : IPaymentService
         _pushNotificationService = pushNotificationService;
     }
 
-    public async Task<Payment> CreatePayment(CreatePaymentRequest createPaymentRequest)
+    public async Task<Payment> CreatePayment(CreatePaymentRequest createPaymentRequest, string methodName)
     {
         var user = _httpContextAccessor.HttpContext?.User!;
         var userId = user.FindFirstValue("UserId");
@@ -41,7 +41,8 @@ public class PaymentService : IPaymentService
             PlanId = createPaymentRequest.PlanId,
             PlanName = plan.Name,
             CreatedAt = DateTime.UtcNow,
-            IsDone = false
+            IsDone = false,
+            MethodName = methodName,
         };
         await _dbContext.Payments.AddAsync(newPayment);
         await _dbContext.SaveChangesAsync();
