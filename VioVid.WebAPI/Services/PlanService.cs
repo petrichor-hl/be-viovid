@@ -21,16 +21,6 @@ public class PlanService : IPlanService
         return await _dbContext.Plans.OrderBy(p => p.Price).ToListAsync();
     }
 
-    public async Task<Plan> GetByIdAsync(Guid id)
-    {
-        var plan = await _dbContext.Plans.FindAsync(id);
-        if (plan == null)
-        {
-            throw new NotFoundException($"Không tìm thấy Plan có id {id}");
-        }
-        return plan;
-    }
-
     public async Task<Plan> CreatePlanAsync(CreatePlanRequest createPlanRequest)
     {
         // Kiểm tra bảng có dữ liệu hay không

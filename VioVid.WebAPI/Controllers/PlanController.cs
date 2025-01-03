@@ -24,26 +24,20 @@ public class PlanController : ControllerBase
         return Ok(ApiResult<List<Plan>>.Success(await _planService.GetAllAsync()));
     }
     
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetGenreById(Guid id)
-    {
-        return Ok(ApiResult<Plan>.Success(await _planService.GetByIdAsync(id)));
-    }
-    
     [HttpPost]
-    public async Task<IActionResult> CreateGenre(CreatePlanRequest createPlanRequest)
+    public async Task<IActionResult> CreatePlan(CreatePlanRequest createPlanRequest)
     {
         return Ok(ApiResult<Plan>.Success(await _planService.CreatePlanAsync(createPlanRequest)));
     }
     
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateGenre(Guid id,[FromBody] UpdatePlanRequest updatePlanRequest)
+    public async Task<IActionResult> UpdatePlan(Guid id,[FromBody] UpdatePlanRequest updatePlanRequest)
     {
         return Ok(ApiResult<Plan>.Success(await _planService.UpdatePlanAsync(id, updatePlanRequest)));
     }
     
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteGenre(Guid id)
+    public async Task<IActionResult> DeletePlan(Guid id)
     {
         return Ok(ApiResult<Guid>.Success(await _planService.DeletePlanAsync(id)));
     }

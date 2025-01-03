@@ -7,8 +7,6 @@ public interface IPlanService
 {
     Task<List<Plan>> GetAllAsync();
     
-    Task<Plan> GetByIdAsync(Guid id);
-    
     Task<Plan> CreatePlanAsync(CreatePlanRequest createPlanRequest);
     
     Task<Plan> UpdatePlanAsync(Guid id, UpdatePlanRequest updateGenreRequest);
