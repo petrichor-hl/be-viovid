@@ -1,8 +1,6 @@
 using Application.DTOs;
-using Application.DTOs.Dashboard;
-using Application.DTOs.Dashboard.Req;
+using Application.DTOs.Dashboard.Res;
 using Microsoft.AspNetCore.Mvc;
-using VioVid.Core.Entities;
 using VioVid.WebAPI.ServiceContracts;
 namespace VioVid.WebAPI.Controllers;
 
@@ -17,9 +15,15 @@ public class DashboardController : ControllerBase
         _dashboardService = dashboardService;
     }
     
-    [HttpGet("registration-stats")]
-    public async Task<IActionResult> GetUserRegistrationStats([FromQuery] GetUserRegistrationStatsRequest getUserRegistrationStatsRequest)
+    [HttpGet("registration-stats/{year:int}")]
+    public async Task<IActionResult> GetUserRegistrationStats(int year)
     {
-        return Ok(ApiResult<List<int>>.Success(await _dashboardService.GetRegistrationsPerMonthAsync(getUserRegistrationStatsRequest)));
+        return Ok(ApiResult<List<int>>.Success(await _dashboardService.GetRegistrationsPerMonthAsync(year)));
+    }
+    
+    [HttpGet("payment-summary/{year:int}")]
+    public async Task<IActionResult> GetPaymentSummary(int year)
+    {
+        return Ok(ApiResult<List<PaymentSummaryResponse>>.Success(await _dashboardService.GetPaymentSummaryPerMonthAsync(year)));
     }
 }

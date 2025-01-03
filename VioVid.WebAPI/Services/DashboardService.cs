@@ -1,5 +1,4 @@
-using Application.DTOs.Dashboard;
-using Application.DTOs.Dashboard.Req;
+using Application.DTOs.Dashboard.Res;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Infrastructure.DatabaseContext;
 using VioVid.WebAPI.ServiceContracts;
@@ -14,10 +13,10 @@ public class DashboardService : IDashboardService
         _dbContext = dbContext;
     }
     
-    public async Task<List<int>> GetRegistrationsPerMonthAsync(GetUserRegistrationStatsRequest getUserRegistrationStatsRequest)
+    public async Task<List<int>> GetRegistrationsPerMonthAsync(int year)
     {
         var stats = await _dbContext.Users
-            .Where(user => user.CreatedDate.Year == getUserRegistrationStatsRequest.Year)
+            .Where(user => user.CreatedDate.Year == year)
             .GroupBy(user => user.CreatedDate.Month)
             .Select(group => new
             {
@@ -36,5 +35,39 @@ public class DashboardService : IDashboardService
             monthlyStats[stat.Month - 1] = stat.Count; // Điều chỉnh vì tháng bắt đầu từ 1
         }
         return monthlyStats;
+    }
+
+    public async Task<List<PaymentSummaryResponse>> GetPaymentSummaryPerMonthAsync(int year)
+    {
+        var result = await _dbContext.Payments
+            .Where(p => p.CreatedAt.Year == year && p.IsDone)
+            .GroupBy(p => new { p.CreatedAt.Month, p.MethodName })
+            .Select(g => new
+            {
+                Month = g.Key.Month,
+                MethodName = g.Key.MethodName,
+                TotalAmount = g.Sum(p => p.Amount)
+            })
+            .ToListAsync();
+
+        var summary = new List<PaymentSummaryResponse>();
+
+        // Khởi tạo các tháng (1 - 12)
+        for (var month = 1; month <= 12; month++)
+        {
+            var momo = result.FirstOrDefault(x => x.Month == month && x.MethodName == "MOMO")?.TotalAmount ?? 0;
+            var vnPay = result.FirstOrDefault(x => x.Month == month && x.MethodName == "VNPAY")?.TotalAmount ?? 0;
+            var stripe = result.FirstOrDefault(x => x.Month == month && x.MethodName == "STRIPE")?.TotalAmount ?? 0;
+
+            summary.Add(new PaymentSummaryResponse()
+            {
+                Month = month,
+                Momo = momo,
+                VnPay = vnPay,
+                Stripe = stripe
+            });
+        }
+
+        return summary;
     }
 }

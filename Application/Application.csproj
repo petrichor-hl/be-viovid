@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="DTOs\Dashboard\Res\" />
+      <Folder Include="DTOs\Dashboard\Req\" />
     </ItemGroup>
 
 </Project>
