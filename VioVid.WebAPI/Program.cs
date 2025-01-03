@@ -63,6 +63,7 @@ builder.Services.AddTransient<IJwtService, JwtService>()
     .AddScoped<IPostCommentService, PostCommentService>()
     .AddScoped<IChannelService, ChannelService>()
     .AddScoped<IUserService, UserService>()
+    .AddScoped<IDashboardService, DashboardService>()
     .AddScoped<INotificationService, NotificationService>()
     .AddScoped<IPushNotificationService, PushNotificationService>();
 

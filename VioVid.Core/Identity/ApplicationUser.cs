@@ -9,6 +9,7 @@ public class ApplicationUser : IdentityUser<Guid>
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpirationDateTime { get; set; }
     public string? FcmToken { get; set; }
+    public DateTime CreatedDate { get; set; }
     public UserProfile UserProfile { get; set; } = null!;
     // public ICollection<UserPlan> UserPlans { get; set; } = null!;
     public ICollection<Payment> Payments { get; set; } = null!;

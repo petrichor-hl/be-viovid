@@ -55,6 +55,7 @@ public class AccountService : IAccountService
         {
             Email = registerRequest.Email,
             UserName = registerRequest.Email,   // UserName is used to log in
+            CreatedDate = DateTime.UtcNow,
             UserProfile = new UserProfile()
             {
                 Name = registerRequest.Name,
