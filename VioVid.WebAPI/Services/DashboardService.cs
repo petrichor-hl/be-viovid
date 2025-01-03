@@ -1,3 +1,4 @@
+using Application.DTOs.Dashboard.Req;
 using Application.DTOs.Dashboard.Res;
 using Microsoft.EntityFrameworkCore;
 using VioVid.Infrastructure.DatabaseContext;
@@ -69,5 +70,20 @@ public class DashboardService : IDashboardService
         }
 
         return summary;
+    }
+
+    public async Task<List<TopViewFilmResponse>> GetTopViewedFilmsAsync(GetTopViewsRequest getTopViewsRequest)
+    {
+        return await _dbContext.Films
+            .OrderByDescending(f => f.NumberOfViews)
+            .Take(getTopViewsRequest.Count)
+            .Select(film => new TopViewFilmResponse
+            {
+                FilmId = film.Id,
+                Name = film.Name,
+                PosterPath = film.PosterPath,
+                NumberOfViews = film.NumberOfViews,
+            })
+            .ToListAsync();
     }
 }

@@ -24,4 +24,6 @@ public interface IFilmService
     Task<Film> UpdateFilmAsync(Guid id, UpdateFilmRequest updateFilmRequest);
     
     Task<Guid> DeleteFilmAsync(Guid id);
+    
+    Task<bool> CountViewForFilmAsync(Guid id);
 }

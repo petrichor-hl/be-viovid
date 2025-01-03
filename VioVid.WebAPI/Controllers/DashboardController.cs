@@ -1,4 +1,5 @@
 using Application.DTOs;
+using Application.DTOs.Dashboard.Req;
 using Application.DTOs.Dashboard.Res;
 using Microsoft.AspNetCore.Mvc;
 using VioVid.WebAPI.ServiceContracts;
@@ -25,5 +26,12 @@ public class DashboardController : ControllerBase
     public async Task<IActionResult> GetPaymentSummary(int year)
     {
         return Ok(ApiResult<List<PaymentSummaryResponse>>.Success(await _dashboardService.GetPaymentSummaryPerMonthAsync(year)));
+    }
+    
+    [HttpGet("top-views")]
+    public async Task<IActionResult> GetTopViewedFilms([FromQuery] GetTopViewsRequest getTopViewsRequest)
+    {
+        return Ok(ApiResult<List<TopViewFilmResponse>>.Success(
+            await _dashboardService.GetTopViewedFilmsAsync(getTopViewsRequest)));
     }
 }

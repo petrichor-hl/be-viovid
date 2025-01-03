@@ -9,7 +9,7 @@ public class Film
     public string BackdropPath { get; set; } = null!;
     public string ContentRating { get; set; } = null!;
     public DateOnly? ReleaseDate { get; set; }
-    
+    public int NumberOfViews { get; set; }
     public ICollection<Season> Seasons { get; set; } = null!;
     public ICollection<GenreFilm> GenreFilms { get; set; } = null!;
     public ICollection<TopicFilm> TopicFilms { get; set; } = null!;

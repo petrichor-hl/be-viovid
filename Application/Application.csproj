@@ -10,8 +10,4 @@
       <ProjectReference Include="..\VioVid.Core\VioVid.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="DTOs\Dashboard\Req\" />
-    </ItemGroup>
-
 </Project>

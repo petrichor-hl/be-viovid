@@ -254,6 +254,7 @@ public class FilmService : IFilmService
             BackdropPath = createFilmRequest.BackdropPath,
             ContentRating = createFilmRequest.ContentRating,
             ReleaseDate = createFilmRequest.ReleaseDate,
+            NumberOfViews = 0,
             Seasons = createFilmRequest.SeasonRequests.Select((seasonRequest, seasonIndex) => new Season
             {
                 Order = seasonIndex,
@@ -558,5 +559,18 @@ public class FilmService : IFilmService
         _dbContext.Films.Remove(film);
         await _dbContext.SaveChangesAsync();
         return id;
+    }
+
+    public async Task<bool> CountViewForFilmAsync(Guid id)
+    {
+        var film = await _dbContext.Films.FindAsync(id);
+        if (film == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Film có id {id}");
+        }
+        
+        film.NumberOfViews++;
+        await _dbContext.SaveChangesAsync();
+        return true;
     }
 }

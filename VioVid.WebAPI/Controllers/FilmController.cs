@@ -73,4 +73,10 @@ public class FilmController : ControllerBase
     {
         return Ok(ApiResult<Guid>.Success(await _filmService.DeleteFilmAsync(id)));
     }
+    
+    [HttpPost("{id:guid}/count-view")]
+    public async Task<IActionResult> CountViewForFilm(Guid id)
+    {
+        return Ok(ApiResult<bool>.Success(await _filmService.CountViewForFilmAsync(id)));
+    }
 }
