@@ -1,4 +1,4 @@
-namespace Application.DTOs.Account;
+namespace Application.DTOs.Account.Res;
 
 public class LoginResponse
 {

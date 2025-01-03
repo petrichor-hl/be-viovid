@@ -1,5 +1,7 @@
 using Application.DTOs;
 using Application.DTOs.Account;
+using Application.DTOs.Account.Req;
+using Application.DTOs.Account.Res;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -50,9 +52,9 @@ public class AccountController : ControllerBase
     }
     
     [HttpPut("update-fcm-token")]
-    public async Task<IActionResult> UpdateFcmToken(UpdateFcmTokenDto updateFcmTokenDto)
+    public async Task<IActionResult> UpdateFcmToken(UpdateFcmTokenRequest updateFcmTokenRequest)
     {
-        return Ok(ApiResult<bool>.Success(await _accountService.UpdateFcmToken(updateFcmTokenDto)));
+        return Ok(ApiResult<bool>.Success(await _accountService.UpdateFcmToken(updateFcmTokenRequest)));
     }
 
     [HttpPost("logout")]
@@ -61,10 +63,10 @@ public class AccountController : ControllerBase
         return Ok(ApiResult<bool>.Success(await _accountService.Logout()));
     }
     
-    [HttpDelete]
-    public async Task<IActionResult> DeleteAccount()
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteAccount(string userId)
     {
-        return Ok(ApiResult<Guid>.Success(await _accountService.DeleteAccount()));
+        return Ok(ApiResult<Guid>.Success(await _accountService.DeleteAccount(userId)));
     }
     
     [HttpPost("change-password")]
@@ -72,5 +74,10 @@ public class AccountController : ControllerBase
     {
         return Ok(ApiResult<bool>.Success(await _accountService.ChangePassword(changePasswordRequest)));
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAllAccounts([FromQuery] GetAccountRequest getAccountRequest)
+    {
+        return Ok(ApiResult<List<AccountResponse>>.Success(await _accountService.GetAllAccounts(getAccountRequest)));
+    }
 }
-
