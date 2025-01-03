@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.DTOs.Account;
+namespace Application.DTOs.Account.Req;
 
 public class UpdateFcmTokenDto
 {

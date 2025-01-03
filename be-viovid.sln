@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VioVid.Infrastructure", "Vi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VioVid.Core", "VioVid.Core\VioVid.Core.csproj", "{4B9B1877-3275-444C-8669-1A6B3E471DB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{FDEAABA3-8021-43BF-B3F2-3688B1C9F3EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VioVid.Application", "VioVid.Application\VioVid.Application.csproj", "{FDEAABA3-8021-43BF-B3F2-3688B1C9F3EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

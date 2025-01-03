@@ -1,5 +1,7 @@
 using Application.DTOs;
 using Application.DTOs.Account;
+using Application.DTOs.Account.Req;
+using Application.DTOs.Account.Res;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -61,16 +63,22 @@ public class AccountController : ControllerBase
         return Ok(ApiResult<bool>.Success(await _accountService.Logout()));
     }
     
-    [HttpDelete]
-    public async Task<IActionResult> DeleteAccount()
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteAccount(string userId)
     {
-        return Ok(ApiResult<Guid>.Success(await _accountService.DeleteAccount()));
+        return Ok(ApiResult<Guid>.Success(await _accountService.DeleteAccount(userId)));
     }
     
     [HttpPost("change-password")]
     public async Task<IActionResult> AddFilmToMyList(ChangePasswordRequest changePasswordRequest)
     {
         return Ok(ApiResult<bool>.Success(await _accountService.ChangePassword(changePasswordRequest)));
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAllAccounts([FromQuery] GetAccountRequest getAccountRequest)
+    {
+        return Ok(ApiResult<List<AccountResponse>>.Success(await _accountService.GetAllAccounts(getAccountRequest)));
     }
 }
 

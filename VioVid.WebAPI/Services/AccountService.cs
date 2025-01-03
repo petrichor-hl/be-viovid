@@ -1,8 +1,11 @@
 using System.Security.Claims;
 using System.Web;
 using Application.DTOs.Account;
+using Application.DTOs.Account.Req;
+using Application.DTOs.Account.Res;
 using Application.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using VioVid.Core.Entities;
 using VioVid.Core.Identity;
 using VioVid.Core.ServiceContracts;
@@ -181,11 +184,8 @@ public class AccountService : IAccountService
         return true;
     }
 
-    public async Task<Guid> DeleteAccount()
+    public async Task<Guid> DeleteAccount(string userId)
     {
-        var userPrincipal = _httpContextAccessor.HttpContext?.User;
-        var userId = userPrincipal!.FindFirstValue("UserId");
-        
         // Tìm người dùng từ cơ sở dữ liệu
         var applicationUser = await _userManager.FindByIdAsync(userId);
         if (applicationUser == null)
@@ -224,5 +224,20 @@ public class AccountService : IAccountService
         }
         
         return true;
+    }
+
+    public async Task<List<AccountResponse>> GetAllAccounts(GetAccountRequest getAccountRequest)
+    {
+        return await _userManager.Users
+            .Include(u => u.UserProfile)
+            .Where(u => getAccountRequest.SearchText == null || u.Email.ToLower().Contains(getAccountRequest.SearchText.ToLower()) || u.UserProfile.Name.ToLower().Contains(getAccountRequest.SearchText.ToLower()))
+            .Select(u => new AccountResponse
+            {
+                ApplicationUserId = u.Id,
+                Email = u.Email,
+                Name = u.UserProfile.Name,
+                Avatar = u.UserProfile.Avatar,
+                EmailConfirmed = u.EmailConfirmed,
+            }).ToListAsync();
     }
 }
