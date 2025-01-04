@@ -12,13 +12,13 @@ public interface ITopicService
     
     Task<TopicResponse> CreateTopicAsync(CreateTopicRequest createTopicRequest);
 
-    Task<TopicResponse> AddFilmsToTopicAsync(Guid topicId, AddFilmsToTopicRequest addFilmsToTopicRequest);
-
-    Task<TopicResponse> RemoveFilmsFromTopicAsync(Guid topicId, RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest);
-
-    Task<Topic> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest);
+    // Task<TopicResponse> AddFilmsToTopicAsync(Guid topicId, AddFilmsToTopicRequest addFilmsToTopicRequest);
     
-    // Task<bool> UpdateListFilm(Guid topicId, UpdateListFilmRequest updateListFilmRequest);
+    // Task<TopicResponse> RemoveFilmsFromTopicAsync(Guid topicId, RemoveFilmsFromTopicRequest removeFilmsFromTopicRequest);
+
+    Task<bool> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest);
+    
+    Task<TopicResponse> UpdateListFilm(Guid topicId, UpdateListFilmRequest updateListFilmRequest);
 
     Task<Guid> DeleteTopicAsync(Guid id);
 }
