@@ -6,7 +6,11 @@ namespace VioVid.WebAPI.ServiceContracts;
 
 public interface ITopicService
 {
-    Task<List<TopicResponse>> GetAllTopicAsync();
+    Task<List<BrowseTopicResponse>> GetBrowseTopicsAsync();
+    
+    Task<List<TopicResponse>> GetAllTopicsAsync();
+    
+    Task<BrowseTopicResponse> GetBrowseTopicAsync(Guid id);
     
     Task<List<TopicResponse>> ReorderTopicsAsync(ReorderTopicsRequest reorderTopicsRequest);
     
@@ -18,7 +22,9 @@ public interface ITopicService
 
     Task<bool> UpdateTopicAsync(Guid id, UpdateTopicRequest updateTopicRequest);
     
-    Task<TopicResponse> UpdateListFilm(Guid topicId, UpdateListFilmRequest updateListFilmRequest);
+    Task<BrowseTopicResponse> UpdateListFilm(Guid topicId, UpdateListFilmRequest updateListFilmRequest);
 
     Task<Guid> DeleteTopicAsync(Guid id);
+    
+    Task<Guid> DeleteFilmInTopicAsync(Guid topicId, Guid filmId);
 }

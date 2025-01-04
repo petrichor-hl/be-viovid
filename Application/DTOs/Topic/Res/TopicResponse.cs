@@ -9,6 +9,4 @@ public class TopicResponse
     public string Name { get; set; } = null!;
     
     public int Order { get; set; }
-    
-    public List<SimpleFilmResponse> Films { get; set; } = new List<SimpleFilmResponse>(); 
 }

@@ -18,10 +18,22 @@ public class TopicController : ControllerBase
         _topicService = topicService;
     }
     
+    [HttpGet("browse")]
+    public async Task<IActionResult> GetBrowseTopics()
+    {
+        return Ok(ApiResult<List<BrowseTopicResponse>>.Success(await _topicService.GetBrowseTopicsAsync()));
+    }
+    
     [HttpGet]
     public async Task<IActionResult> GetAllTopics()
     {
-        return Ok(ApiResult<List<TopicResponse>>.Success(await _topicService.GetAllTopicAsync()));
+        return Ok(ApiResult<List<TopicResponse>>.Success(await _topicService.GetAllTopicsAsync()));
+    }
+    
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetBrowseTopicById(Guid id)
+    {
+        return Ok(ApiResult<BrowseTopicResponse>.Success(await _topicService.GetBrowseTopicAsync(id)));
     }
     
     [HttpPost("re-order")]
@@ -56,12 +68,18 @@ public class TopicController : ControllerBase
     [HttpPut("{id:guid}/update-list-film")]
     public async Task<IActionResult> UpdateListFilm(Guid id, [FromBody] UpdateListFilmRequest updateListFilmRequest)
     {
-        return Ok(ApiResult<TopicResponse>.Success(await _topicService.UpdateListFilm(id, updateListFilmRequest)));
+        return Ok(ApiResult<BrowseTopicResponse>.Success(await _topicService.UpdateListFilm(id, updateListFilmRequest)));
     }
     
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteTopic(Guid id)
     {
         return Ok(ApiResult<Guid>.Success(await _topicService.DeleteTopicAsync(id)));
+    }
+    
+    [HttpDelete("{topicId:guid}/delete-film/{filmId:guid}")]
+    public async Task<IActionResult> DeleteFilmInTopic(Guid topicId, Guid filmId)
+    {
+        return Ok(ApiResult<Guid>.Success(await _topicService.DeleteFilmInTopicAsync(topicId, filmId)));
     }
 }

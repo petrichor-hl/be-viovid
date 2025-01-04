@@ -18,13 +18,13 @@ public class TopicService : ITopicService
         _dbContext = dbContext;
     }
     
-    public async Task<List<TopicResponse>> GetAllTopicAsync()
+    public async Task<List<BrowseTopicResponse>> GetBrowseTopicsAsync()
     {
         return await _dbContext.Topics
             .Include(topic => topic.TopicFilms)
             .ThenInclude(tp => tp.Film)
             .OrderBy(topic => topic.Order)
-            .Select(topic => new TopicResponse
+            .Select(topic => new BrowseTopicResponse
             {
                 TopicId = topic.Id,
                 Name = topic.Name,
@@ -36,6 +36,46 @@ public class TopicService : ITopicService
                     PosterPath = tp.Film.PosterPath,
                 }).ToList(),
             }).ToListAsync();
+    }
+    
+    public async Task<List<TopicResponse>> GetAllTopicsAsync()
+    {
+        return await _dbContext.Topics
+            .Include(topic => topic.TopicFilms)
+            .ThenInclude(tp => tp.Film)
+            .OrderBy(topic => topic.Order)
+            .Select(topic => new TopicResponse
+            {
+                TopicId = topic.Id,
+                Name = topic.Name,
+                Order = topic.Order,
+            }).ToListAsync();
+    }
+
+    public async Task<BrowseTopicResponse> GetBrowseTopicAsync(Guid id)
+    {
+        var topic = await _dbContext.Topics
+            .Include(topic => topic.TopicFilms)
+            .ThenInclude(topicFilm => topicFilm.Film)
+            .FirstOrDefaultAsync(topic => topic.Id == id);
+
+        if (topic == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Topic {id}");
+        }
+
+        return new BrowseTopicResponse
+        {
+            TopicId = topic.Id,
+            Name = topic.Name,
+            Order = topic.Order,
+            Films = topic.TopicFilms.Select(tf => new SimpleFilmResponse
+            {
+                FilmId = tf.FilmId,
+                Name = tf.Film.Name,
+                PosterPath = tf.Film.PosterPath,
+            }).ToList(),
+        };
     }
 
     public async Task<List<TopicResponse>> ReorderTopicsAsync(ReorderTopicsRequest reorderTopicsRequest)
@@ -69,7 +109,7 @@ public class TopicService : ITopicService
                 oldIndex, newIndex, newIndex, oldIndex - 1);
         }
         
-        return await GetAllTopicAsync();
+        return await GetAllTopicsAsync();
     }
 
     public async Task<TopicResponse> CreateTopicAsync(CreateTopicRequest createTopicRequest)
@@ -91,7 +131,6 @@ public class TopicService : ITopicService
             TopicId = newTopic.Id,
             Name = newTopic.Name,
             Order = newTopic.Order,
-            Films = new List<SimpleFilmResponse>()
         };
     }
 
@@ -198,7 +237,7 @@ public class TopicService : ITopicService
         return true;
     }
 
-    public async Task<TopicResponse> UpdateListFilm(Guid topicId, UpdateListFilmRequest updateListFilmRequest)
+    public async Task<BrowseTopicResponse> UpdateListFilm(Guid topicId, UpdateListFilmRequest updateListFilmRequest)
     {
         var topic = await _dbContext.Topics
             .Include(topic => topic.TopicFilms)
@@ -225,7 +264,7 @@ public class TopicService : ITopicService
             .Include(tf => tf.Film)
             .LoadAsync();
     
-        return new TopicResponse
+        return new BrowseTopicResponse
         {
             TopicId = topic.Id,
             Name = topic.Name,
@@ -260,5 +299,20 @@ public class TopicService : ITopicService
         await _dbContext.SaveChangesAsync();
         
         return id;
+    }
+
+    public async Task<Guid> DeleteFilmInTopicAsync(Guid topicId, Guid filmId)
+    {
+        var topicFilm = await _dbContext.TopicFilms.FirstOrDefaultAsync(topicFilm => topicFilm.TopicId == topicId && topicFilm.FilmId == filmId);
+
+        if (topicFilm == null)
+        {
+            throw new NotFoundException($"Không tìm thấy Film {filmId} trong Topic {topicId}");
+        }
+        
+        _dbContext.TopicFilms.Remove(topicFilm);
+        await _dbContext.SaveChangesAsync();
+        
+        return filmId;
     }
 }
