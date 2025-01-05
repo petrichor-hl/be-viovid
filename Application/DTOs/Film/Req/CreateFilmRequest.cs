@@ -27,11 +27,11 @@ public class CreateFilmRequest
     [JsonPropertyName("seasons")]
     public IEnumerable<SeasonRequest> SeasonRequests { get; set; } = new List<SeasonRequest>();
     
-    [JsonPropertyName("genreFilms")]
-    public IEnumerable<GenreRequest> GenreRequests { get; set; } = new List<GenreRequest>();
+    [JsonPropertyName("genreIds")]
+    public IEnumerable<Guid> GenreIds { get; set; } = new List<Guid>();
     
-    [JsonPropertyName("topicFilms")]
-    public IEnumerable<TopicRequest> TopicRequests { get; set; } = new List<TopicRequest>();
+    [JsonPropertyName("topicIds")]
+    public IEnumerable<Guid> TopicIds { get; set; } = new List<Guid>();
     
     [JsonPropertyName("casts")]
     public IEnumerable<CastRequest> CastRequests { get; set; } = new List<CastRequest>();
@@ -76,16 +76,6 @@ public class EpisodeRequest
     
     [Required]
     public bool IsFree { get; set; }
-}
-
-public class GenreRequest
-{
-    public Guid Id { get; set; }
-}
-
-public class TopicRequest
-{
-    public Guid Id { get; set; }
 }
 
 public class CastRequest

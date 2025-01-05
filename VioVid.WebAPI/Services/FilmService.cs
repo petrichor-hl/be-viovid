@@ -270,13 +270,13 @@ public class FilmService : IFilmService
                     IsFree = episodeRequest.IsFree,
                 }).ToList(),
             }).ToList(),
-            GenreFilms = createFilmRequest.GenreRequests.Select(genreRequest => new GenreFilm
+            GenreFilms = createFilmRequest.GenreIds.Select(genreId => new GenreFilm
             {
-                GenreId = genreRequest.Id,
+                GenreId = genreId,
             }).ToList(),
-            TopicFilms = createFilmRequest.TopicRequests.Select(topicRequest => new TopicFilm
+            TopicFilms = createFilmRequest.TopicIds.Select(topicId => new TopicFilm
             {
-                TopicId = topicRequest.Id,
+                TopicId = topicId,
             }).ToList(),
             Casts = createFilmRequest.CastRequests.Select(castRequest => new Cast
             {
@@ -460,9 +460,9 @@ public class FilmService : IFilmService
         _dbContext.RemoveRange(film.GenreFilms);
         
         // Thêm danh sách GenreFilms từ updateFilmRequest vào Film
-        film.GenreFilms = updateFilmRequest.GenreRequests.Select(gr => new GenreFilm
+        film.GenreFilms = updateFilmRequest.GenreIds.Select(genreId => new GenreFilm
         {
-            GenreId = gr.Id,
+            GenreId = genreId,
         }).ToList();
         
         #endregion
@@ -473,9 +473,9 @@ public class FilmService : IFilmService
         _dbContext.RemoveRange(film.TopicFilms);
         
         // Thêm danh sách GenreFilms từ updateFilmRequest vào Film
-        film.TopicFilms = updateFilmRequest.TopicRequests.Select(tr => new TopicFilm
+        film.TopicFilms = updateFilmRequest.TopicIds.Select(topicId => new TopicFilm
         {
-            TopicId = tr.Id,
+            TopicId = topicId,
         }).ToList();
         
         #endregion
