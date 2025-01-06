@@ -24,6 +24,9 @@ public class CreateFilmRequest
     [Required]
     public DateOnly? ReleaseDate { get; set; }
     
+    [Required]
+    public string TmdbId { get; set; } = string.Empty;
+    
     [JsonPropertyName("seasons")]
     public IEnumerable<SeasonRequest> SeasonRequests { get; set; } = new List<SeasonRequest>();
     

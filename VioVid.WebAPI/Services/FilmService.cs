@@ -128,6 +128,7 @@ public class FilmService : IFilmService
         BackdropPath = film.BackdropPath,
         ContentRating = film.ContentRating,
         ReleaseDate = film.ReleaseDate,
+        TmdbId = film.TmdbId,
         Seasons = seasonResponses,
         Genres = genreResponses,
     };
@@ -254,6 +255,7 @@ public class FilmService : IFilmService
             BackdropPath = createFilmRequest.BackdropPath,
             ContentRating = createFilmRequest.ContentRating,
             ReleaseDate = createFilmRequest.ReleaseDate,
+            TmdbId = createFilmRequest.TmdbId,
             NumberOfViews = 0,
             Seasons = createFilmRequest.SeasonRequests.Select((seasonRequest, seasonIndex) => new Season
             {
