@@ -19,4 +19,6 @@ public interface IUserService
     Task<bool> UpdateTrackingProgressAsync(UpdateTrackingProgressRequest updateTrackingProgressRequest);
     
     Task<List<UserPaymentResponse>> GetUserPayments();
+
+    Task<bool> UpdateThreadIdAsync(UpdateThreadIdRequest updateThreadIdRequest);
 }

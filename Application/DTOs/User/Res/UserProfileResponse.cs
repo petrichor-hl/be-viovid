@@ -12,4 +12,6 @@ public class UserProfileResponse
     public DateOnly? EndDate { get; set; }
     
     public string? FcmToken { get; set; }
+    
+    public string? ThreadId { get; set; } = null!;
 }

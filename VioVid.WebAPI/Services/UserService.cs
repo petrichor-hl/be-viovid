@@ -47,6 +47,7 @@ public class UserService : IUserService
             Email = applicationUser.Email,
             Avatar = applicationUser.UserProfile.Avatar,
             FcmToken = applicationUser.FcmToken,
+            ThreadId = applicationUser.UserProfile.ThreadId,
         };
 
         var latestUserPayment = applicationUser.Payments
@@ -205,5 +206,24 @@ public class UserService : IUserService
             StartDate = payment.StartDate,
             EndDate = payment.EndDate,
         }).ToList();
+    }
+
+    public async Task<bool> UpdateThreadIdAsync(UpdateThreadIdRequest updateThreadIdRequest)
+    {
+        var user = _httpContextAccessor.HttpContext?.User!;
+        var userIdClaim = user.FindFirst("UserId");
+        var applicationUserId = Guid.Parse(userIdClaim!.Value);
+
+        var userProfile = _dbContext.UserProfiles.FirstOrDefault(u => u.ApplicationUserId == applicationUserId);
+
+        if (userProfile == null)
+        {
+            throw new NotFoundException($"Không tìm thấy UserProfile của User {applicationUserId}.");
+        }
+        
+        userProfile.ThreadId = updateThreadIdRequest.ThreadId;
+        await  _dbContext.SaveChangesAsync();
+
+        return true;
     }
 }

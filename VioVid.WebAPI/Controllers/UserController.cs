@@ -60,4 +60,10 @@ public class UserController : ControllerBase
     {
         return Ok(ApiResult<List<UserPaymentResponse>>.Success(await _userService.GetUserPayments()));
     }
+    
+    [HttpPut("update-thread-id")]
+    public async Task<IActionResult> UpdateThreadId(UpdateThreadIdRequest updateThreadIdRequest)
+    {
+        return Ok(ApiResult<bool>.Success(await _userService.UpdateThreadIdAsync(updateThreadIdRequest)));
+    }
 }
